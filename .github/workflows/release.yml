@@ -1,0 +1,67 @@
+name: Build & Release Sonik
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl + cargo-deb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+          cargo install cargo-deb
+
+      - name: Build static binaries
+        env:
+          RUSTFLAGS: "-C target-feature=+crt-static"
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Build .deb package
+        run: |
+          cargo deb --no-build --target x86_64-unknown-linux-musl
+          mkdir -p dist
+          cp target/x86_64-unknown-linux-musl/release/sonik dist/sonik
+          cp target/x86_64-unknown-linux-musl/release/sonikd dist/sonikd
+          cp target/debian/*.deb dist/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonik-build
+          path: dist/*
+
+  release:
+    name: Publish Release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: sonik-build
+          path: ./dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

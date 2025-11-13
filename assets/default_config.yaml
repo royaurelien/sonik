@@ -1,0 +1,7 @@
+# Sonik Default Configuration File
+
+watch:
+  enabled: true
+  debounce_ms: 300
+
+device:

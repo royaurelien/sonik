@@ -1,120 +1,149 @@
-# sonik
+# Sonik
 
-**sonik** is a small Rust utility that synchronizes a local music directory to a mounted device.  
-It supports manual sync and automatic sync when the target mountpoint appears.
+[![Build & Release (multi-arch static)](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
 
-Configuration follows the XDG standard:
+Originally built for the Innoasis Y1 MP3 player, Sonik focuses on syncing folders, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
+It performs diff-based transfers with no unnecessary writes, preserving the lifespan of your device.
+Fast, minimal, and adaptable, Sonik can easily extend to other targets beyond music players.
 
+## Features
+
+- Incremental sync (only changed files)
+- Automatic device detection via hot-plug monitoring
+- Real-time file watching with debouncing
+- Binary index for fast comparison
+- Multi-device support with YAML configuration
+- Progress bars and detailed statistics
+
+## Installation
+
+See the [releases page](https://github.com/royaurelien/sonik/releases) for pre-built binaries.
+
+This provides two binaries: `sonik` (CLI) and `sonikd` (daemon).
+
+## Configuration
+
+Use `sonik edit-config` to define your devices and folders (configuration file is generally located at `~/.config/sonik/config.yaml`).
+
+To add a device, use the following template:
+
+```yaml
+device:
+  - name: MY_DEVICE
+    label: "My Device"
+    mount: "/media/{user}/{device}"
+    mountinfo: true
+    folders:
+      - source: "~/Music/Library"
+        target: "Music"
+        enabled: true
 ```
-~/.config/sonik/config.toml
-```
 
-Example:
 
-```toml
-source = "/home/user/Music"
-target = "/media/user/MyDevice/Music"
+| Field      | Description |
+|------------|-------------|
+| **name**       | Unique device identifier (must match actual mount point) |
+| **label**      | Device label |
+| **mount**      | Expected mount path template |
+| **mountinfo**  | Enable automatic detection via /proc/self/mountinfo (**recommended**). Otherwise, detection is performed by checking the existence of the full path to the mount point. |
+| **source**     | Local source folder path |
+| **target**     | Target folder on device (relative to mount point) |
+| **enabled**    | Enable/disable this folder sync |
+You can use the following placeholders in the mount path:
+- `{user}` is replaced with your username.
+- `{uid}` is replaced with your user ID.
+- `{device}` is replaced with the device name.
+
+Please note, the mount path is where the device is expected to be found. It depends on your desktop environment:
+- Ubuntu/GNOME : `/media/$USER/`
+- KDE/Fedora/Arch : `/run/media/$USER/`
+
+Multiple devices and folders can be defined in the configuration file.
+
+## Usage
+
+Manual sync: `sonik run`  
+Daemon mode: `sonikd`
+
+## How It Works
+
+Sonik uses binary index files stored locally to track file states (path, size, mtime). On sync, it compares the current filesystem state with the index to determine what needs to be uploaded or deleted.
+
+The daemon monitors for device mounts and watches source directories with inotify. Events are debounced to avoid excessive syncs during rapid file changes.
+
+```mermaid
+graph TB
+    User[User] -->|sonik run| CLI[CLI]
+    User -->|sonikd| Daemon[Daemon]
+    
+    CLI --> Config[Load Config]
+    Config --> SyncEngine[Sync Engine]
+    SyncEngine --> Operations[Batch Operations]
+    Operations --> Device[USB Device]
+    
+    Daemon --> Config2[Load Config]
+    Config2 --> DaemonState[Daemon State]
+    DaemonState --> Watcher[File Watcher]
+    DaemonState --> Detector[Device Detector]
+    
+    Watcher -->|File changes| DaemonState
+    Detector -->|Device mount| DaemonState
+    DaemonState --> SyncEngine2[Sync Engine]
+    SyncEngine2 --> Operations2[Batch Operations]
+    Operations2 --> Device
 ```
 
 ## Requirements
 
-- Rust (stable)
-- A target device that mounts as a real filesystem (no MTP)
-- Linux system with inotify support
+Linux with inotify support, Rust 1.70+. Target devices must be real filesystems (no MTP).
 
-## Build
+## Systemd Service
 
-Build in debug:
+To run sonikd automatically, install the provided systemd user service:
 
 ```bash
-cargo build
+mkdir -p ~/.config/systemd/user
+cp sonik.service ~/.config/systemd/user/sonikd.service
+systemctl --user enable --now sonikd.service
 ```
 
-Build optimized:
-
-```bash
-cargo build --release
-```
-
-The binary ends up in:
-
-```
-target/release/sonik
-```
-
-Install locally:
-
-```bash
-cargo install --path .
-```
-
-## Configuration
-
-```bash
-mkdir -p ~/.config/sonik
-nano ~/.config/sonik/config.toml
-```
-
-Example:
-
-```toml
-source = "/home/user/Music"
-target = "/media/user/MyDevice/Music"
-```
-
-## Usage
-
-Manual sync:
-
-```bash
-sonik run
-```
-
-Automatic sync:
-
-```bash
-sonik watch
-```
-
-Verbose mode:
-
-```bash
-RUST_LOG=info sonik watch
-```
+View logs with `journalctl --user -u sonikd -f`
 
 ## Development
 
+Standard Rust workflow: `cargo build`, `cargo test`, `cargo clippy`.
+
+The codebase is organized into core (scanning, diff, index), sync (engine, watcher, operations), utils (formatting, filesystem), and daemon (state management) modules.
+
+## Troubleshooting
+
+Check device detection: `ls /media/$USER/`  
+Test write permissions: `touch /media/$USER/MyUSB/.test`  
+Check daemon status: `ps aux | grep sonikd`  
+Enable debug logs: `RUST_LOG=debug sonik run`
+
+## Troubleshooting
+
+**Device not detected**: Check that device name in config matches mount point:
 ```bash
-cargo install cargo-watch
-cargo watch -x run
-cargo test
+ls /media/$USER/
 ```
 
-## Optional: systemd user service
-
-Create:
-
-```
-~/.config/systemd/user/sonik.service
-```
-
-```ini
-[Unit]
-Description=Sonik auto-sync
-
-[Service]
-ExecStart=%h/.cargo/bin/sonik watch
-Restart=always
-
-[Install]
-WantedBy=default.target
-```
-
-Enable:
-
+**Permission denied**: Ensure target device is writable:
 ```bash
-systemctl --user enable --now sonik.service
+touch /media/$USER/MyUSB/.test && rm /media/$USER/MyUSB/.test
 ```
+
+**Sync not triggering**: Check daemon is running:
+```bash
+ps aux | grep sonikd
+```
+
+**Logs not showing**: Enable debug logging:
+```bash
+RUST_LOG=debug sonik run
+```
+
 
 ## License
 

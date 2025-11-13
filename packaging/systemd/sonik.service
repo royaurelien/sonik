@@ -1,0 +1,12 @@
+[Unit]
+Description=Sonik Sync Daemon
+After=default.target
+
+[Service]
+ExecStart=/usr/bin/sonikd
+Restart=on-failure
+Type=notify
+NotifyAccess=all
+
+[Install]
+WantedBy=default.target

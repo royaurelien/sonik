@@ -1,0 +1,60 @@
+/// sync/detect.rs
+/// Detect mounted devices based on /proc/self/mountinfo
+
+use std::fs;
+use std::path::PathBuf;
+
+use crate::config::{AppConfig, DeviceConfig};
+
+const PROC_MOUNTINFO: &str = "/proc/self/mountinfo";
+
+/// Parse /proc/self/mountinfo and return all mount points
+fn read_mounts() -> Vec<PathBuf> {
+    let mut out = Vec::new();
+
+    if let Ok(txt) = fs::read_to_string(PROC_MOUNTINFO) {
+        for line in txt.lines() {
+            // format: <id> <parent> <major:minor> <root> <mountpoint> <options> ...
+            // we only need the 5th field
+            if let Some(mp) = line.split_whitespace().nth(4) {
+                out.push(PathBuf::from(mp));
+            }
+        }
+    }
+
+    out
+}
+
+
+/// Return list of mounted devices declared in config.yaml
+pub fn detect_all_devices(app_conf: &AppConfig) -> Vec<(DeviceConfig, PathBuf)> {
+    let mut out = Vec::new();
+    let mounts = read_mounts();
+
+    for dev in &app_conf.device {
+        // Always produce the expected full mount path
+        // let expected = expand_mount_pattern(&dev.mount, &dev.name);
+        let expected = dev.expanded_path();
+
+        match dev.mountinfo {
+            true => {
+                // USB mount must appear in /proc/self/mountinfo
+                for mp in &mounts {
+                    if *mp == expected {
+                        out.push((dev.clone(), mp.clone()));
+                        break;
+                    }
+                }
+            }
+
+            false => {
+                // GVFS mount exists ONLY if device is mounted
+                if expected.exists() {
+                    out.push((dev.clone(), expected.clone()));
+                }
+            }
+        }
+    }
+
+    out
+}

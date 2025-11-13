@@ -1,11 +1,16 @@
-# Minimal Makefile for sonik
+# Makefile for sonik
 
-.PHONY: all build release install clean
+FAKE_SCRIPT=./fake-device.sh
+
+.PHONY: all build release install clean fake-on fake-off
 
 all: release
 
 build:
 	cargo build
+
+dev:
+	RUST_LOG=debug cargo run
 
 release:
 	cargo build --release
@@ -15,3 +20,13 @@ install:
 
 clean:
 	cargo clean
+
+# --- Fake device commands -----------------------------------------
+
+fake-on:
+	@echo "[+] Attaching and auto-mounting fake device..."
+	$(FAKE_SCRIPT) create
+
+fake-off:
+	@echo "[+] Unmounting and detaching fake device..."
+	$(FAKE_SCRIPT) unmount

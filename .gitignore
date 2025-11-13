@@ -29,3 +29,7 @@ perf.data.old
 # Environment files
 .env
 .env.local
+
+*.img
+ARCHITECTURE.md
+INDEX_STRATEGY.md

@@ -1,15 +1,51 @@
 [package]
 name = "sonik"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2021"
+authors = ["Aurelien ROY <roy.aurelien@etik.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/royaurelien/sonik"
+description = "Fast, diff-based sync utility for music devices and other targets."
+section = "utils"
+priority = "optional"
+
+[[bin]]
+name = "sonik"
+path = "src/bin/sonik.rs"
+
+[[bin]]
+name = "sonikd"
+path = "src/bin/sonikd.rs"
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-toml = "0.8"
-notify = "6"
-walkdir = "2"
-indicatif = "0.17"
-fs_extra = "1"
-clap = { version = "4", features = ["derive"] }
-whoami = "1"
 anyhow = "1"
+bincode = "1.3"
+blake3 = "1.8.2"
+chrono = "0.4"
+clap = { version = "4", features = ["derive"] }
+dirs = "5"
+env_logger = "0.11"
+fs_extra = "1"
+indicatif = "0.17"
+log = "0.4"
+nix = { version = "0.30.1", features = ["user"] }
+notify = "6"
+notify-rust = "4.11.7"
+once_cell = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+walkdir = "2"
+whoami = "1"
+
+[package.metadata.deb]
+maintainer = "Aurelien ROY <roy.aurelien@etik.com>"
+assets = [
+  ["target/release/sonik", "/usr/bin/sonik", "755"],
+  ["target/release/sonikd", "/usr/bin/sonikd", "755"],
+  ["packaging/systemd/sonik.service", "/usr/lib/systemd/user/sonik.service", "644"]
+]
