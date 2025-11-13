@@ -1,0 +1,31 @@
+# Generated files
+target/
+Cargo.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Debug and profiling
+*.pdb
+perf.data
+perf.data.old
+
+# Testing
+*.profraw
+*.profdata
+
+# Documentation
+/target/doc/
+
+# Backup files
+*.bak
+*.orig
+
+# Environment files
+.env
+.env.local

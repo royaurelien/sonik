@@ -1,0 +1,15 @@
+[package]
+name = "sonik"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+notify = "6"
+walkdir = "2"
+indicatif = "0.17"
+fs_extra = "1"
+clap = { version = "4", features = ["derive"] }
+whoami = "1"
+anyhow = "1"
