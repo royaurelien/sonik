@@ -18,6 +18,16 @@ release:
 install:
 	cargo install --path .
 
+
+uninstall:
+	cargo uninstall sonik || true
+
+deb:
+	sudo apt remove sonik || true
+	cargo build --release
+	cargo deb --no-build
+	sudo dpkg -i target/debian/sonik_*.deb
+
 clean:
 	cargo clean
 

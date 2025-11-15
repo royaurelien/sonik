@@ -1,13 +1,11 @@
 #!/bin/bash
 set -e
 
-# Reload systemd user units
-su "$SUDO_USER" -c "systemctl --user daemon-reload"
-
-# Enable service for the current user (optional but recommended)
-su "$SUDO_USER" -c "systemctl --user enable sonik.service" || true
-
-# Start daemon immediately
-su "$SUDO_USER" -c "systemctl --user start sonik.service" || true
+# Reload user systemd units *only when a bus is available*
+if su "$SUDO_USER" -c "systemctl --user daemon-reload" 2>/dev/null; then
+    echo "systemd user reload OK"
+else
+    echo "Skipping systemd --user reload (no user session detected)"
+fi
 
 exit 0

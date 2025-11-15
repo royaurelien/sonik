@@ -57,6 +57,10 @@ fn main() -> Result<()> {
     );
 
     tracing::info!("Daemon fully started. Watching for devices & changes.");
+
+    // Notify systemd that we're ready
+    sd_notify::notify(false, &[sd_notify::NotifyState::Ready]).ok();
+
     std::thread::park();
 
     Ok(())
