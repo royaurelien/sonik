@@ -1,10 +1,14 @@
 # Sonik
 
+![Love](https://img.shields.io/badge/Made%20with%20%E2%9D%A4-Rust-brown)
 [![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-Originally built for the Innoasis Y1 MP3 player, Sonik focuses on syncing folders, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
-It performs diff-based transfers with no unnecessary writes, preserving the lifespan of your device.
-Fast, minimal, and adaptable, Sonik can easily extend to other targets beyond music players.
+Originally built for the Innoasis Y1 MP3 player, Sonik focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
+ 
+It performs **diff-based transfers** with **no unnecessary writes**, preserving the lifespan of your device.
+ 
+**Fast**, **minimal**, and **adaptable**, It can easily extend to other targets beyond music players.
 
 ## Features
 
@@ -42,23 +46,21 @@ device:
 
 | Field      | Description |
 |------------|-------------|
-| **name**       | Unique device identifier (must match actual mount point) |
-| **label**      | Device label |
-| **mount**      | Expected mount path template |
+| **name**       | Unique device identifier, must match actual mount point. |
+| **label**      | Device label (friendly name, not required). |
+| **mount**      | Expected mount path template. The mount path is where the device is expected to be found. It depends on your desktop environment: `/media/{user}/` for Ubuntu/GNOME, `/run/media/{user}/` for KDE/Fedora/Arch. |
 | **mountinfo**  | Enable automatic detection via /proc/self/mountinfo (**recommended**). Otherwise, detection is performed by checking the existence of the full path to the mount point. |
-| **source**     | Local source folder path |
-| **target**     | Target folder on device (relative to mount point) |
-| **enabled**    | Enable/disable this folder sync |
-You can use the following placeholders in the mount path:
+| **source**     | Local source folder path. Relative paths are expanded from the user's home directory. |
+| **target**     | Target folder on device (relative to mount point). |
+| **enabled**    | Enable/disable this folder sync. |
+
+
+The following placeholders are supported in paths:
 - `{user}` is replaced with your username.
 - `{uid}` is replaced with your user ID.
 - `{device}` is replaced with the device name.
 
-Please note, the mount path is where the device is expected to be found. It depends on your desktop environment:
-- Ubuntu/GNOME : `/media/$USER/`
-- KDE/Fedora/Arch : `/run/media/$USER/`
-
-Multiple devices and folders can be defined in the configuration file.
+> Multiple devices and folders can be defined in the configuration file.
 
 ## Usage
 
