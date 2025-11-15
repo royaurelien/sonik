@@ -40,7 +40,6 @@ fn compute_sync_stats(diff: &crate::core::diff::Diff, previous: &[IndexedFile]) 
     )
 }
 
-
 /// Perform a full sync for one folder pair
 pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Result<()> {
     tracing::debug!("Sync folder called for {}", conf.device_name);
@@ -100,7 +99,6 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
     } else {
         None
     };    
-
 
     // Perform sync operations using batch functions
     let done_upload = upload_batch(&conf.source, &conf.target, &diff.to_upload, pb.as_ref(), verbose)?;

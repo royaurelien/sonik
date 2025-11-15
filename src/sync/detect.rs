@@ -28,7 +28,6 @@ fn read_mounts() -> Vec<PathBuf> {
     out
 }
 
-
 /// Return list of mounted devices declared in config.yaml
 pub fn detect_all_devices(ctx: &ExecutionContext) -> Vec<(DeviceConfig, PathBuf)> {
     let mut out = Vec::new();

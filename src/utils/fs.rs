@@ -7,7 +7,6 @@ use anyhow::Result;
 use std::path::{ Path, PathBuf};
 use std::fs;
 
-use crate::context::{EnvContext, PathExpander};
 
 /// Ensure path is writable
 pub fn ensure_writable(path: &Path) -> anyhow::Result<()> {
@@ -37,34 +36,4 @@ pub fn delete_one(target: &Path, rel: &PathBuf) -> Result<()> {
         fs::remove_file(p)?;
     }
     Ok(())
-}
-
-
-impl PathExpander {
-    pub fn new(ctx: EnvContext) -> Self {
-        Self { ctx }
-    }
-
-    pub fn expand(&self, input: &str, device: &str) -> PathBuf {
-        let mut out = input.to_string();
-
-        // Expand ~/
-        if let Some(s) = out.strip_prefix("~/") {
-            out = format!("{}/{}", self.ctx.home, s);
-        }
-
-        // Replace variables
-        let replacements = [
-            ("{home}",  self.ctx.home.as_str()),
-            ("{user}",  self.ctx.user.as_str()),
-            ("{uid}",   self.ctx.uid.as_str()),
-            ("{device}", device),
-        ];
-
-        for (key, val) in replacements {
-            out = out.replace(key, val);
-        }
-
-        PathBuf::from(out)
-    }
 }

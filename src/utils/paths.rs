@@ -6,6 +6,8 @@
 use std::path::PathBuf;
 use anyhow::{Result, Context};
 
+use crate::context::{EnvContext, PathExpander};
+
 /// Get standard directory with fallback
 pub fn data_dir() -> Result<PathBuf> {
     dirs::data_dir()
@@ -44,4 +46,33 @@ pub fn ensure_dir(path: &PathBuf) -> Result<()> {
             .with_context(|| format!("Failed to create directory: {}", path.display()))?;
     }
     Ok(())
+}
+
+impl PathExpander {
+    pub fn new(ctx: EnvContext) -> Self {
+        Self { ctx }
+    }
+
+    pub fn expand(&self, input: &str, device: &str) -> PathBuf {
+        let mut out = input.to_string();
+
+        // Expand ~/
+        if let Some(s) = out.strip_prefix("~/") {
+            out = format!("{}/{}", self.ctx.home, s);
+        }
+
+        // Replace variables
+        let replacements = [
+            ("{home}",  self.ctx.home.as_str()),
+            ("{user}",  self.ctx.user.as_str()),
+            ("{uid}",   self.ctx.uid.as_str()),
+            ("{device}", device),
+        ];
+
+        for (key, val) in replacements {
+            out = out.replace(key, val);
+        }
+
+        PathBuf::from(out)
+    }
 }

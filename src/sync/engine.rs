@@ -11,7 +11,6 @@ use crate::config::SyncConfig;
 use crate::sync::run::sync_folder;
 
 /// Stateless sync engine: it only executes syncs.
-/// SyncConfig is now constructed exclusively by AppConfig.
 #[derive(Debug, Clone)]
 pub struct SyncEngine {
     syncing: Arc<Mutex<bool>>,

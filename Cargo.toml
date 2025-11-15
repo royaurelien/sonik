@@ -4,6 +4,7 @@ version = "1.0.0"
 edition = "2021"
 authors = ["Aurelien ROY <roy.aurelien@etik.com>"]
 license = "MIT"
+license-file = "LICENSE"
 readme = "README.md"
 repository = "https://github.com/royaurelien/sonik"
 description = "Fast, diff-based sync utility for music devices and other targets."
@@ -43,7 +44,6 @@ whoami = "1"
 
 [package.metadata.deb]
 maintainer = "Aurelien ROY <roy.aurelien@etik.com>"
-license-file = "LICENSE"
 assets = [
   ["target/release/sonik", "/usr/bin/sonik", "755"],
   ["target/release/sonikd", "/usr/bin/sonikd", "755"],
