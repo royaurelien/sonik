@@ -3,13 +3,14 @@
 
 //! Manage application configuration.
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::fs;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
 use crate::utils::slug::unique_slug;
+use crate::utils::paths;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
 
@@ -59,17 +60,14 @@ pub struct SyncConfig {
 impl AppConfig {
     /// Return path: ~/.config/sonik/config.yaml
     pub fn filepath() -> Result<PathBuf> {
-        let base = dirs::config_dir()
-            .ok_or_else(|| anyhow!("No system config directory found (dirs::config_dir is None)"))?;
-
-        Ok(base.join("sonik").join("config.yaml"))
+        let base = paths::app_config_dir()?;
+        Ok(base.join("config.yaml"))
     }
 
     /// Create config file + parent directories
     fn bootstrap(path: &Path) -> Result<()> {
         if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)
-                .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
+            paths::ensure_dir(&parent.to_path_buf())?;
         }
 
         fs::write(path, DEFAULT_CONFIG)
@@ -104,9 +102,7 @@ impl AppConfig {
     pub fn _build_sync_configs(&self, active_only: bool) -> Result<Vec<SyncConfig>> {
         let mut out = Vec::new();
 
-        let data_base = dirs::data_dir()
-            .ok_or_else(|| anyhow!("Failed to determine system data directory"))?
-            .join("sonik");
+        let data_base = paths::app_data_dir()?;
 
         for device in &self.device {
             for folder in &device.folders {

@@ -4,10 +4,12 @@
 //! Command to clear indexes for a given device.
 
 use std::fs;
+use anyhow::Result;
 
-pub fn run(device: &str) -> anyhow::Result<()> {
-    let base = dirs::data_dir().unwrap().join("sonik");
-    let target_dir = base.join(&device);
+pub fn run(device: &str) -> Result<()> {
+    use crate::utils::paths::app_data_dir;
+    let base = app_data_dir()?;
+    let target_dir = base.join(device);
 
     if !target_dir.exists() {
         println!("No index folder found for device '{}'", device);
