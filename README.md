@@ -1,8 +1,8 @@
 # Sonik
 
 ![Love](https://img.shields.io/badge/Made%20with%20%E2%9D%A4-Rust-brown)
-[![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
+[![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
 
 Originally built for the Innoasis Y1 MP3 player, Sonik focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
  

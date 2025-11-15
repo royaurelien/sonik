@@ -52,3 +52,4 @@ assets = [
   ["target/release/sonikd", "/usr/bin/sonikd", "755"],
   ["packaging/systemd/sonik.service", "/usr/lib/systemd/user/sonik.service", "644"]
 ]
+maintainer-scripts = "packaging/debian"
