@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use std::thread;
 use std::time::Duration;
 
-use crate::config::AppConfig;
+use crate::context::ExecutionContext;
 use crate::sync::detect::detect_all_devices;
 
 pub struct DetectCallbacks<CbMount, CbUmount>
@@ -19,7 +19,7 @@ where
 }
 
 pub fn start_detect_loop<CbMount, CbUmount>(
-    config: AppConfig,
+    ctx: ExecutionContext,
     callbacks: DetectCallbacks<CbMount, CbUmount>,
 ) where
     CbMount: Fn(String) + Send + Sync + 'static,
@@ -29,7 +29,7 @@ pub fn start_detect_loop<CbMount, CbUmount>(
         let mut previous: HashSet<String> = HashSet::new();
 
         loop {
-            let detected: HashSet<String> = detect_all_devices(&config)
+            let detected: HashSet<String> = detect_all_devices(&ctx)
                 .into_iter()
                 .map(|(dev, _)| dev.name)
                 .collect();

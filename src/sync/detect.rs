@@ -4,7 +4,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use crate::config::{AppConfig, DeviceConfig};
+use crate::config::DeviceConfig;
+use crate::context::ExecutionContext;
 
 const PROC_MOUNTINFO: &str = "/proc/self/mountinfo";
 
@@ -27,14 +28,13 @@ fn read_mounts() -> Vec<PathBuf> {
 
 
 /// Return list of mounted devices declared in config.yaml
-pub fn detect_all_devices(app_conf: &AppConfig) -> Vec<(DeviceConfig, PathBuf)> {
+pub fn detect_all_devices(ctx: &ExecutionContext) -> Vec<(DeviceConfig, PathBuf)> {
     let mut out = Vec::new();
     let mounts = read_mounts();
 
-    for dev in &app_conf.device {
+    for dev in &ctx.config.device {
         // Always produce the expected full mount path
-        // let expected = expand_mount_pattern(&dev.mount, &dev.name);
-        let expected = dev.expanded_path();
+        let expected = ctx.expand_mount(dev);
 
         match dev.mountinfo {
             true => {

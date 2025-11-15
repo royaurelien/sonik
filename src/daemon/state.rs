@@ -3,7 +3,8 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::config::{AppConfig, SyncConfig};
+use crate::config::SyncConfig;
+use crate::context::ExecutionContext;
 use crate::sync::engine::SyncEngine;
 use crate::sync::watcher::WatcherControl;
 use crate::sync::planner::plan_sync;
@@ -11,16 +12,16 @@ use notify::Event;
 
 #[derive(Clone, Debug)]
 pub struct DaemonState {
-    app_conf: Arc<AppConfig>,
+    ctx: Arc<ExecutionContext>,
     engine: SyncEngine,
     watcher: WatcherControl,
     active_syncs: Arc<Mutex<Vec<SyncConfig>>>,
 }
 
 impl DaemonState {
-    pub fn new(app_conf: AppConfig, engine: SyncEngine, watcher: WatcherControl) -> Self {
+    pub fn new(ctx: ExecutionContext, engine: SyncEngine, watcher: WatcherControl) -> Self {
         Self {
-            app_conf: Arc::new(app_conf),
+            ctx: Arc::new(ctx),
             engine,
             watcher,
             active_syncs: Arc::new(Mutex::new(Vec::new())),
@@ -31,7 +32,7 @@ impl DaemonState {
     fn refresh_plan(&self, reason: &str) {
         tracing::info!("Daemon: refreshing sync plan ({})...", reason);
 
-        let plan = match plan_sync(&self.app_conf) {
+        let plan = match plan_sync(&self.ctx) {
             Ok(p) => p,
             Err(e) => {
                 tracing::error!("Plan sync error: {}", e);

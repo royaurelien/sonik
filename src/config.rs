@@ -4,12 +4,16 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::fmt;
+use users::{get_current_uid, get_user_by_uid};
+use std::env;
 
 use crate::utils::slug::unique_slug;
 
+
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
+
 
 
 /// Top-level configuration
@@ -104,7 +108,7 @@ impl AppConfig {
         let mut out = Vec::new();
 
         for device in &self.device {
-            let device_root= device.expanded_path();            
+                      
 
             for folder in &device.folders {
                 if active_only && !folder.enabled {
@@ -116,11 +120,13 @@ impl AppConfig {
                     .join(&device.name)
                     .join(format!("{}.bin", unique_slug(&folder.target, &device.name)));
 
-                let target_path = device_root.join(&folder.target);
+                // Paths need to be expanded later
+                let target_path = PathBuf::from(&device.mount).join(&folder.target);
+                let source_path = PathBuf::from(&folder.source);
 
                 out.push(SyncConfig {
                     device_name: device.name.clone(),
-                    source: PathBuf::from(&folder.source),
+                    source: source_path,
                     target: target_path,
                     index_path,
                     enabled: folder.enabled,
@@ -147,18 +153,4 @@ impl fmt::Display for SyncConfig {
     }
 }
 
-impl DeviceConfig {
-    /// Expand patterns like {uid}, {user} and {device}
-    pub fn expanded_path(&self) -> PathBuf {
-        let uid = nix::unistd::getuid().as_raw();
-        let user = whoami::username();
 
-        let expanded = self.mount
-            .replace("{uid}", &uid.to_string())
-            .replace("{user}", &user)
-            .replace("{device}", &self.name);
-
-        // tracing::info!("Expanded mount pattern: {}", expanded);
-        PathBuf::from(expanded)
-    }    
-}

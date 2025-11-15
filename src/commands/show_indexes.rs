@@ -2,12 +2,12 @@
 
 
 use anyhow::Result;
-use crate::config::AppConfig;
+use crate::context::ExecutionContext;
 use crate::core::index::Index;
 
-pub fn run(app_conf: &AppConfig, verbose: bool) -> Result<()> {
+pub fn run(ctx: &ExecutionContext, verbose: bool) -> Result<()> {
 
-    let all = app_conf._build_sync_configs(false)?;
+    let all = ctx.config._build_sync_configs(false)?;
 
     if all.is_empty() {
         println!("No folders configured for sync.");

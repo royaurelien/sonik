@@ -1,33 +1,29 @@
-/// bin/sonikd.rs
-/// Main binary for Sonik daemon.
-
 use anyhow::Result;
 use tracing_subscriber::fmt;
 
-use sonik::config::load_config;
 use sonik::daemon::state::DaemonState;
 use sonik::sync::detect_loop::{start_detect_loop, DetectCallbacks};
 use sonik::sync::engine::SyncEngine;
 use sonik::sync::watcher::start_watcher;
+use sonik::context::ExecutionContext;
+
+// À mettre au niveau module, pas dans main()
+static DAEMON_STATE: once_cell::sync::OnceCell<DaemonState> = once_cell::sync::OnceCell::new();
 
 fn main() -> Result<()> {
     fmt().with_target(false).with_ansi(false).init();
     tracing::info!("Sonik daemon starting…");
 
-    // Load configuration
-    let app_conf = load_config().map_err(|e| {
-        tracing::error!("Failed to load config: {e}");
-        e
-    })?;
+    // 1. Construire le contexte d'exécution
+    let ctx = ExecutionContext::from_default_config()?;
+    let ctx_for_detect = ctx.clone(); // clone pour le detect_loop
 
-    // Create engine (no config inside)
+    // 3. Créer le moteur
     let engine = SyncEngine::new();
 
-    // Start watcher (dynamic)
-    let app_conf_clone = app_conf.clone();
-
+    // 4. Démarrer le watcher (juste besoin du debounce)
     let watcher = start_watcher(
-        app_conf.watch.debounce_ms,
+        ctx.config.watch.debounce_ms,
         move |batch| {
             // Batch callback, forward to DaemonState
             let state = DAEMON_STATE.get().unwrap();
@@ -35,17 +31,14 @@ fn main() -> Result<()> {
         },
     )?;
 
-    // Build daemon state
-    static DAEMON_STATE: once_cell::sync::OnceCell<DaemonState> = once_cell::sync::OnceCell::new();
+    // 5. Construire l'état du daemon (ctx est MOVÉ ici)
     DAEMON_STATE
-        .set(DaemonState::new(app_conf.clone(), engine.clone(), watcher.clone()))
+        .set(DaemonState::new(ctx, engine, watcher))
         .unwrap();
 
-    let _state = DAEMON_STATE.get().unwrap();
-
-    // Hot-plug detection
+    // 6. Hot-plug detection (utilise le CLONE du ctx)
     start_detect_loop(
-        app_conf_clone,
+        ctx_for_detect,
         DetectCallbacks {
             on_mount: move |dev| {
                 let state = DAEMON_STATE.get().unwrap();

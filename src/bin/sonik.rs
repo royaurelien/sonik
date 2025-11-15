@@ -1,10 +1,7 @@
-/// bin/sonik.rs
-/// Main binary for Sonik application.
-
-use sonik::config;
 use sonik::commands;
+use sonik::context::ExecutionContext;
 
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 use anyhow::Result;
 use log::info;
 
@@ -56,11 +53,11 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     let show_progress = !cli.no_progress_bar;
 
-    let app_conf = config::load_config()?;
+    let ctx = ExecutionContext::from_default_config()?;
 
     match cli.command {
         Some(Cmd::Run { verbose }) => {
-            commands::run::run_now(&app_conf, verbose, show_progress)?;
+            commands::run::run_now(&ctx, verbose, show_progress)?;
         }
 
         Some(Cmd::Dump { file, pretty }) => {
@@ -76,11 +73,11 @@ fn main() -> Result<()> {
         }
 
         Some(Cmd::ShowConfig { verbose }) => {
-            commands::show_config::run(&app_conf, verbose)?;
+            commands::show_config::run(&ctx, verbose)?;
         }
         
         Some(Cmd::ShowIndexes { verbose }) => {
-            commands::show_indexes::run(&app_conf, verbose)?;
+            commands::show_indexes::run(&ctx, verbose)?;
         }
 
         Some(Cmd::EditConfig { }) => {
@@ -88,8 +85,9 @@ fn main() -> Result<()> {
         }
 
         None => {
-            // Default: run without progress bar unless user overrides
-            commands::run::run_now(&app_conf, false, show_progress)?;
+            // print help if no command given
+            Cli::command().print_help()?;
+            println!();
         }
     }
 

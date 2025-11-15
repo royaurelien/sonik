@@ -3,21 +3,25 @@
 use anyhow::Result;
 use std::collections::HashSet;
 
-use crate::config::{AppConfig, SyncConfig};
+use crate::config::SyncConfig;
+use crate::context::ExecutionContext;
 use crate::sync::detect::detect_all_devices;
 
 /// Compute a list of SyncConfig that point to mounted devices.
 /// This is used by both the daemon and the run_now CLI command.
-pub fn plan_sync(app_conf: &AppConfig) -> Result<Vec<SyncConfig>> {
+pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncConfig>> {
     // Step 1: build all possible sync configs from YAML
-    let all = app_conf.build_sync_configs()?;
+    let all = ctx.config.build_sync_configs()?;
 
     if all.is_empty() {
         return Ok(vec![]);
     }
 
+    // Expand paths
+    let all = ctx.expand_paths(all.iter().collect());
+
     // Step 2: detect currently mounted devices
-    let mounted = detect_all_devices(app_conf);
+    let mounted = detect_all_devices(&ctx);
 
     if mounted.is_empty() {
         return Ok(vec![]);

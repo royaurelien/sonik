@@ -2,15 +2,16 @@
 /// Command to run sync immediately for all configured folders.
 
 use anyhow::Result;
-use crate::config::{AppConfig,SyncConfig};
+use crate::config::{SyncConfig};
+use crate::context::ExecutionContext;
 use crate::sync::run::sync_folder;
 use crate::sync::planner::plan_sync;
 
 /// Run sync immediately for all devices defined in the config.
-pub fn run_now(app_conf: &AppConfig, verbose: bool, show_progress: bool) -> Result<()> {
+pub fn run_now(ctx: &ExecutionContext, verbose: bool, show_progress: bool) -> Result<()> {
     println!("Starting Sonik...");
 
-    let plan = plan_sync(app_conf)?;
+    let plan = plan_sync(ctx)?;
 
     if plan.is_empty() {
         println!("No valid sync targets (check mounted devices).");

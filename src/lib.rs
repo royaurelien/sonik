@@ -6,3 +6,4 @@ pub mod core;
 pub mod daemon;
 pub mod sync;
 pub mod utils;
+pub mod context;
