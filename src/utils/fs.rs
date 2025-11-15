@@ -1,5 +1,7 @@
-/// utils/fs.rs
-/// File system utility functions.
+// SPDX-License-Identifier: MIT
+// src/utils/fs.rs
+
+//! Filesystem utilities.
 
 use anyhow::Result;
 use std::path::{ Path, PathBuf};

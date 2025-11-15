@@ -1,6 +1,6 @@
 # Sonik
 
-[![Build & Release (multi-arch static)](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
+[![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
 
 Originally built for the Innoasis Y1 MP3 player, Sonik focuses on syncing folders, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
 It performs diff-based transfers with no unnecessary writes, preserving the lifespan of your device.

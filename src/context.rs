@@ -1,10 +1,14 @@
+// SPDX-License-Identifier: MIT
 // src/context.rs
+
+//! Execution context for Sonik application, including configuration, 
+//! environment details and path expansion.
 
 use users::{get_current_uid, get_user_by_uid};
 use std::env;
 use std::path::PathBuf;
 
-use crate::config::{AppConfig, SyncConfig, DeviceConfig, load_config};
+use crate::config::{AppConfig, SyncConfig, DeviceConfig};
 
 #[derive(Clone, Debug)]
 pub struct EnvContext {
@@ -48,7 +52,7 @@ impl ExecutionContext {
     }
 
     pub fn from_default_config() -> Result<Self, anyhow::Error> {
-        let config = match load_config() {
+        let config = match AppConfig::load() {
             Ok(conf) => conf,
             Err(e) => {
                 tracing::error!("Failed to load config, using built-in default: {}", e);

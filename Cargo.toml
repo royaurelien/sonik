@@ -7,8 +7,6 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/royaurelien/sonik"
 description = "Fast, diff-based sync utility for music devices and other targets."
-section = "utils"
-priority = "optional"
 
 [[bin]]
 name = "sonik"
@@ -45,6 +43,7 @@ whoami = "1"
 
 [package.metadata.deb]
 maintainer = "Aurelien ROY <roy.aurelien@etik.com>"
+license-file = "LICENSE"
 assets = [
   ["target/release/sonik", "/usr/bin/sonik", "755"],
   ["target/release/sonikd", "/usr/bin/sonikd", "755"],

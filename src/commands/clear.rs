@@ -1,5 +1,7 @@
-/// commands/clear.rs
-/// Command to clear indexes for a given device.
+// SPDX-License-Identifier: MIT
+// src/commands/clear.rs
+
+//! Command to clear indexes for a given device.
 
 use std::fs;
 

@@ -1,5 +1,7 @@
-/// sync/mod.rs
-/// Public export for sync system: watcher, engine, hotplug detection.
+// SPDX-License-Identifier: MIT
+// src/sync/mod.rs
+
+//! Sync module for Sonik application.
 
 pub mod detect;
 pub mod detect_loop;

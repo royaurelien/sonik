@@ -1,6 +1,8 @@
-// sync/detect_loop.rs
-// Hot-plug detection loop based on /proc/self/mountinfo.
-// Calls the provided callbacks whenever a device is mounted or unmounted.
+// SPDX-License-Identifier: MIT
+// src/sync/detect_loop.rs
+
+//! Hot-plug detection loop based on /proc/self/mountinfo or equivalent.
+//! Calls the provided callbacks whenever a device is mounted or unmounted.
 
 use std::collections::HashSet;
 use std::thread;

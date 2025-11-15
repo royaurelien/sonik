@@ -1,5 +1,7 @@
-/// core/diff.rs
-/// Module for computing differences between file indexes.
+// SPDX-License-Identifier: MIT
+// src/core/diff.rs
+
+//! Module for computing differences between local files and previous index.
 
 use crate::core::index::IndexedFile;
 use std::collections::{HashMap, HashSet};

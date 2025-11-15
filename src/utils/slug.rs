@@ -1,5 +1,7 @@
-/// utils/slug.rs
-/// Utility functions for generating unique slugs.
+// SPDX-License-Identifier: MIT
+// src/utils/slug.rs
+
+//! Utility to create unique slugs based on labels and contexts.
 
 use blake3;
 

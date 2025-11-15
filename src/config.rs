@@ -1,20 +1,17 @@
-/// config.rs
-/// Application configuration structures and loader.
+// SPDX-License-Identifier: MIT
+// src/config.rs
 
-use anyhow::{Context, Result};
+//! Manage application configuration.
+
+use anyhow::{anyhow, Context, Result};
 use serde::Deserialize;
 use std::fs;
-use std::path::{Path, PathBuf};
 use std::fmt;
-use users::{get_current_uid, get_user_by_uid};
-use std::env;
+use std::path::{Path, PathBuf};
 
 use crate::utils::slug::unique_slug;
 
-
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
-
-
 
 /// Top-level configuration
 #[derive(Debug, Deserialize, Clone)]
@@ -59,70 +56,70 @@ pub struct SyncConfig {
 }
 
 
-/// Get path to config file
-pub fn get_config_file() -> PathBuf {
-    dirs::config_dir()
-        .unwrap()
-        .join("sonik")
-        .join("config.yaml")
-}
-
-
-/// Create config file + parent dirs if missing
-fn bootstrap_config(path: &PathBuf) -> Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)
-            .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
-    }
-
-    fs::write(path, DEFAULT_CONFIG)
-        .with_context(|| format!("Failed to write default config to {}", path.display()))?;
-
-    Ok(())
-}
-
-/// Load configuration from file, bootstrapping if missing
-pub fn load_config() -> Result<AppConfig> {
-    let path = get_config_file();
-
-    if !path.exists() {
-        bootstrap_config(&path)?;
-    }
-
-    let txt = fs::read_to_string(&path)
-        .with_context(|| format!("Failed to read config: {}", path.display()))?;
-
-    let conf: AppConfig = serde_yaml::from_str(&txt)
-        .with_context(|| format!("Invalid YAML in {}", path.display()))?;
-
-    Ok(conf)
-}
-
 impl AppConfig {
-    /// Build a list of all required sync configurations
+    /// Return path: ~/.config/sonik/config.yaml
+    pub fn filepath() -> Result<PathBuf> {
+        let base = dirs::config_dir()
+            .ok_or_else(|| anyhow!("No system config directory found (dirs::config_dir is None)"))?;
+
+        Ok(base.join("sonik").join("config.yaml"))
+    }
+
+    /// Create config file + parent directories
+    fn bootstrap(path: &Path) -> Result<()> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)
+                .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
+        }
+
+        fs::write(path, DEFAULT_CONFIG)
+            .with_context(|| format!("Failed to write default config into {}", path.display()))?;
+
+        Ok(())
+    }
+
+    /// Load configuration, creating file if missing
+    pub fn load() -> Result<Self> {
+        let path = Self::filepath()?;
+
+        if !path.exists() {
+            Self::bootstrap(&path)?;
+        }
+
+        let txt = fs::read_to_string(&path)
+            .with_context(|| format!("Failed to read config: {}", path.display()))?;
+
+        let conf: Self = serde_yaml::from_str(&txt)
+            .with_context(|| format!("Invalid YAML in {}", path.display()))?;
+
+        Ok(conf)
+    }
+
+    /// Build list of active sync configurations
     pub fn build_sync_configs(&self) -> Result<Vec<SyncConfig>> {
         self._build_sync_configs(true)
     }
 
+    /// Same logic, but allows including inactive folders (for diagnostics)
     pub fn _build_sync_configs(&self, active_only: bool) -> Result<Vec<SyncConfig>> {
         let mut out = Vec::new();
 
-        for device in &self.device {
-                      
+        let data_base = dirs::data_dir()
+            .ok_or_else(|| anyhow!("Failed to determine system data directory"))?
+            .join("sonik");
 
+        for device in &self.device {
             for folder in &device.folders {
                 if active_only && !folder.enabled {
                     continue;
                 }
-                let index_path = dirs::data_dir()
-                    .unwrap()
-                    .join("sonik")
+
+                let index_path = data_base
                     .join(&device.name)
                     .join(format!("{}.bin", unique_slug(&folder.target, &device.name)));
 
-                // Paths need to be expanded later
-                let target_path = PathBuf::from(&device.mount).join(&folder.target);
                 let source_path = PathBuf::from(&folder.source);
+                let target_path = PathBuf::from(&device.mount).join(&folder.target);
 
                 out.push(SyncConfig {
                     device_name: device.name.clone(),
@@ -136,8 +133,8 @@ impl AppConfig {
 
         Ok(out)
     }
-
 }
+
 
 impl fmt::Display for SyncConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

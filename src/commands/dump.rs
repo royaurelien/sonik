@@ -1,5 +1,7 @@
-/// commands/dump.rs
-/// Command to dump the contents of an index file.
+// SPDX-License-Identifier: MIT
+// src/commands/dump.rs
+
+//! Command to dump the contents of an index file.
 
 use crate::core::index::Index;
 use anyhow::Result;

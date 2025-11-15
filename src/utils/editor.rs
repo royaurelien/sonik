@@ -1,11 +1,14 @@
+// SPDX-License-Identifier: MIT
+// src/utils/editor.rs
+
+//! Utility to open files in the system's default editor.
+
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-/// Open the config file in the system's default editor.
-/// - Creates the file if missing.
-/// - Uses xdg-open (Linux), open (macOS), start (Windows).
+// Open the config file in the system's default editor.
 pub fn open_in_default_editor(path: &Path) -> Result<()> {
     // Ensure parent directories exist
     if let Some(parent) = path.parent() {

@@ -1,5 +1,7 @@
-/// commands/stats.rs
-/// Command to display statistics about an index file.
+// SPDX-License-Identifier: MIT
+// src/commands/stats.rs
+
+//! Command to display statistics about an index file.
 
 use crate::core::index::Index;
 use crate::utils::human::{human_size, human_date};

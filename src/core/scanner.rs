@@ -1,5 +1,7 @@
-/// core/scanner.rs
-/// Module for scanning local filesystem and producing file indexes.
+// SPDX-License-Identifier: MIT
+// src/core/scanner.rs
+
+//! Sanning local filesystem and producing file indexes.
 
 use crate::core::index::IndexedFile;
 use walkdir::WalkDir;

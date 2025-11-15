@@ -1,5 +1,7 @@
-/// sync/validation.rs
-/// Validation utilities for sync operations
+// SPDX-License-Identifier: MIT
+// src/sync/validation.rs
+
+//! Validation utilities for sync operations, such as checking source and target paths.
 
 use anyhow::{Result, Context};
 use std::path::Path;

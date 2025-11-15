@@ -1,4 +1,8 @@
+// SPDX-License-Identifier: MIT
 // src/sync/planner.rs
+
+//! Sync planner is responsible for determining which configured sync folders
+//! correspond to currently mounted devices.
 
 use anyhow::Result;
 use std::collections::HashSet;
@@ -17,7 +21,7 @@ pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncConfig>> {
         return Ok(vec![]);
     }
 
-    // Expand paths
+    // Expand paths from context (e.g., ~ to home directory)
     let all = ctx.expand_paths(all.iter().collect());
 
     // Step 2: detect currently mounted devices

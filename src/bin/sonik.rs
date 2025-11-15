@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// src/bin/sonik.rs
+
+//! Main CLI entry point for Sonik application.
+
 use sonik::commands;
 use sonik::context::ExecutionContext;
 
@@ -12,6 +17,9 @@ struct Cli {
     #[arg(long)]
     no_progress_bar: bool,
 
+    #[arg(short,long)]
+    verbose: bool,
+
     #[command(subcommand)]
     command: Option<Cmd>,
 }
@@ -19,8 +27,6 @@ struct Cli {
 #[derive(Subcommand)]
 enum Cmd {
     Run {
-        #[arg(short, long)]
-        verbose: bool,
     },
     Dump {
         file: String,
@@ -34,12 +40,8 @@ enum Cmd {
         device: String,
     },
     ShowConfig {
-        #[arg(short, long)]
-        verbose: bool,
     },
     ShowIndexes {
-        #[arg(short, long)]
-        verbose: bool,
     },
     EditConfig {
 
@@ -52,13 +54,14 @@ fn main() -> Result<()> {
 
     let cli = Cli::parse();
     let show_progress = !cli.no_progress_bar;
+    let verbose = cli.verbose;
 
     let ctx = ExecutionContext::from_default_config()?;
 
     match cli.command {
-        Some(Cmd::Run { verbose }) => {
+        Some(Cmd::Run { }) => {
             commands::run::run_now(&ctx, verbose, show_progress)?;
-        }
+        }   
 
         Some(Cmd::Dump { file, pretty }) => {
             commands::dump::run(&file, pretty)?;
@@ -72,11 +75,11 @@ fn main() -> Result<()> {
             commands::clear::run(&device)?;
         }
 
-        Some(Cmd::ShowConfig { verbose }) => {
-            commands::show_config::run(&ctx, verbose)?;
+        Some(Cmd::ShowConfig { }) => {
+            commands::config::run_show(&ctx, verbose)?;
         }
         
-        Some(Cmd::ShowIndexes { verbose }) => {
+        Some(Cmd::ShowIndexes { }) => {
             commands::show_indexes::run(&ctx, verbose)?;
         }
 

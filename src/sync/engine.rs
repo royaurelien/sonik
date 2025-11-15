@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// src/sync/engine.rs
+
+//! Sync engine responsible for executing synchronization operations.
+
 use std::sync::{Arc, Mutex};
 use anyhow::Result;
 use notify::Event;

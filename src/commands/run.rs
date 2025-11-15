@@ -1,5 +1,7 @@
-/// commands/run.rs
-/// Command to run sync immediately for all configured folders.
+// SPDX-License-Identifier: MIT
+// src/commands/run.rs
+
+//! Command to run sync immediately for all configured folders.
 
 use anyhow::Result;
 use crate::config::{SyncConfig};

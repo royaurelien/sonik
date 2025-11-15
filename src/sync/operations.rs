@@ -1,5 +1,7 @@
-/// sync/operations.rs
-/// Reusable sync operations (upload, delete batches)
+// SPDX-License-Identifier: MIT
+// src/sync/operations.rs
+
+//! Batch operations for uploading and deleting files.
 
 use anyhow::Result;
 use std::path::{Path, PathBuf};

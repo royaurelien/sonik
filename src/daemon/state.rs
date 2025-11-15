@@ -1,5 +1,7 @@
-/// daemon/state.rs
-/// Central state for Sonik daemon.
+// SPDX-License-Identifier: MIT
+// src/daemon/state.rs
+
+//! State machine, handling device events and sync operations.
 
 use std::sync::{Arc, Mutex};
 

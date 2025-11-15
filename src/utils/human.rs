@@ -1,5 +1,7 @@
-/// utils/human.rs
-/// Human-readable formatting utilities.
+// SPDX-License-Identifier: MIT
+// src/utils/human.rs
+
+//! Human-readable formatting utilities.
 
 use chrono::{TimeZone, Local};
 

@@ -1,5 +1,7 @@
-/// core/index.rs
-/// Module for handling file indexes.
+// SPDX-License-Identifier: MIT
+// src/core/index.rs
+
+//! Handling file indexes, including loading, saving, and updating.
 
 use serde::{Serialize, Deserialize};
 use chrono::Utc;

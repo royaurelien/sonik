@@ -1,5 +1,7 @@
-/// sync/detect.rs
-/// Detect mounted devices based on /proc/self/mountinfo
+// SPDX-License-Identifier: MIT
+// src/sync/detect.rs
+
+//! Utilities for detecting mounted devices based on configuration.
 
 use std::fs;
 use std::path::PathBuf;

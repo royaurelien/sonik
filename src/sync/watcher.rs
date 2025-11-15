@@ -1,7 +1,7 @@
-/// sync/watcher.rs
-/// Dynamic filesystem watcher with debounce.
-/// The watcher no longer inspects AppConfig or devices.
-/// It only watches the paths that DaemonState explicitly provides.
+// SPDX-License-Identifier: MIT
+// src/sync/watcher.rs
+
+//! Watches filesystem paths given by DaemonState; no AppConfig or device logic here.
 
 use anyhow::Result;
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};

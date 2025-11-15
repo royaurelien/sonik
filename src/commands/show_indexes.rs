@@ -1,5 +1,7 @@
-/// commands/show_config.rs
+// SPDX-License-Identifier: MIT
+// src/commands/show_indexes.rs
 
+//! Command to show indexes for configured devices.
 
 use anyhow::Result;
 use crate::context::ExecutionContext;

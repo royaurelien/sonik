@@ -1,5 +1,7 @@
-/// sync/run.rs
-/// Module for running synchronization tasks.
+// SPDX-License-Identifier: MIT
+// src/sync/run.rs
+
+//! Perform synchronization for a single folder pair.
 
 use anyhow::Result;
 use std::time::Instant;

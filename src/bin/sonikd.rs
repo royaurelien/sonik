@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: MIT
+// src/bin/sonikd.rs
+
+//! Main daemon entry point for Sonik application.
+
 use anyhow::Result;
 use tracing_subscriber::fmt;
 
@@ -14,14 +19,14 @@ fn main() -> Result<()> {
     fmt().with_target(false).with_ansi(false).init();
     tracing::info!("Sonik daemon starting…");
 
-    // 1. Construire le contexte d'exécution
+    // 1. Build execution context
     let ctx = ExecutionContext::from_default_config()?;
-    let ctx_for_detect = ctx.clone(); // clone pour le detect_loop
+    let ctx_for_detect = ctx.clone(); // clone for detect_loop
 
-    // 3. Créer le moteur
+    // 2. Create engine
     let engine = SyncEngine::new();
 
-    // 4. Démarrer le watcher (juste besoin du debounce)
+    // 3. Start watcher (only need debounce)
     let watcher = start_watcher(
         ctx.config.watch.debounce_ms,
         move |batch| {
@@ -31,12 +36,12 @@ fn main() -> Result<()> {
         },
     )?;
 
-    // 5. Construire l'état du daemon (ctx est MOVÉ ici)
+    // 4. Build daemon state (ctx is MOVED here)
     DAEMON_STATE
         .set(DaemonState::new(ctx, engine, watcher))
         .unwrap();
 
-    // 6. Hot-plug detection (utilise le CLONE du ctx)
+    // 5. Hot-plug detection (uses the CLONE of ctx)
     start_detect_loop(
         ctx_for_detect,
         DetectCallbacks {
