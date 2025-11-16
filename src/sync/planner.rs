@@ -7,22 +7,24 @@
 use anyhow::Result;
 use std::collections::HashSet;
 
-use crate::config::SyncConfig;
+use crate::config::SyncTask;
 use crate::context::ExecutionContext;
 use crate::sync::detect::detect_all_devices;
+use crate::config::{SyncTaskFilter, SyncTaskExpand};
 
-/// Compute a list of SyncConfig that point to mounted devices.
+/// Compute a list of SyncTask that point to mounted devices.
 /// This is used by both the daemon and the run_sync CLI command.
-pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncConfig>> {
+pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncTask>> {
     // Step 1: build all possible sync configs from YAML
-    let all = ctx.config.build_sync_configs()?;
+    let tasks = ctx.config.load_tasks()?.enabled();
 
-    if all.is_empty() {
+    // Expand paths from context (e.g., ~ to home directory)
+    let tasks = tasks.expanded(ctx);
+
+    if tasks.is_empty() {
         return Ok(vec![]);
     }
 
-    // Expand paths from context (e.g., ~ to home directory)
-    let all = ctx.expand_paths(all.iter().collect());
 
     // Step 2: detect currently mounted devices
     let mounted = detect_all_devices(&ctx);
@@ -31,14 +33,11 @@ pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncConfig>> {
         return Ok(vec![]);
     }
 
+    // Step 3: keep only tasks whose device is mounted
     let mounted_names: HashSet<&str> =
         mounted.iter().map(|(dev, _)| dev.name.as_str()).collect();
 
-    // Step 3: keep only configs whose device is mounted
-    let filtered: Vec<SyncConfig> = all
-        .into_iter()
-        .filter(|conf| mounted_names.contains(conf.device_name.as_str()))
-        .collect();
+    let filtered = tasks.only_devices(&mounted_names);
 
     Ok(filtered)
 }

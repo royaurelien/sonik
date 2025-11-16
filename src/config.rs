@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 
 use crate::utils::slug::unique_slug;
 use crate::utils::paths;
+use crate::context::ExecutionContext;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
 
@@ -46,16 +47,68 @@ pub struct FolderConfig {
     pub enabled: bool,
 }
 
-/// Runtime structure used for each sync operation
+/// Runtime structure used for each sync operation.
+/// Holds full DeviceConfig + FolderConfig.
 #[derive(Debug, Clone)]
-pub struct SyncConfig {
-    pub device_name: String,
+pub struct SyncTask {
+    pub device: DeviceConfig,
+    pub folder: FolderConfig,
+
+    // runtime-only
+    pub index_path: PathBuf,
     pub source: PathBuf,
     pub target: PathBuf,
-    pub index_path: PathBuf,
-    pub enabled: bool,
 }
 
+pub trait SyncTaskFilter {
+    fn by_device(self, name: &str) -> Vec<SyncTask>;
+    fn enabled(self) -> Vec<SyncTask>;
+    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask>;
+}
+
+impl SyncTaskFilter for Vec<SyncTask> {
+    fn by_device(self, name: &str) -> Vec<SyncTask> {
+        self.into_iter()
+            .filter(|c| c.device.name == name)
+            .collect()
+    }
+
+    fn enabled(self) -> Vec<SyncTask> {
+        self.into_iter()
+            .filter(|item| item.folder.enabled)
+            .collect()
+    }
+
+    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask> {
+        self.into_iter()
+            .filter(|item| names.contains(item.device.name.as_str()))
+            .collect()
+    }
+
+}
+
+impl SyncTask {
+    // Return a new SyncTask with expanded source and target paths.
+    pub fn expanded(&self, ctx: &ExecutionContext) -> Self {
+        SyncTask {
+            source: ctx.expander.expand(self.source.to_str().unwrap(), self.device.name.as_str()),
+            target: ctx.expander.expand(self.target.to_str().unwrap(), self.device.name.as_str()),
+            ..self.clone()
+        }
+    }
+}
+
+pub trait SyncTaskExpand {
+    fn expanded(self, ctx: &ExecutionContext) -> Vec<SyncTask>;
+}
+
+impl SyncTaskExpand for Vec<SyncTask> {
+    fn expanded(self, ctx: &ExecutionContext) -> Vec<SyncTask> {
+        self.into_iter()
+            .map(|t| t.expanded(ctx))
+            .collect()
+    }
+}
 
 impl AppConfig {
     /// Return path: ~/.config/plainsync/config.yaml
@@ -94,35 +147,27 @@ impl AppConfig {
     }
 
     /// Build list of active sync configurations
-    pub fn build_sync_configs(&self) -> Result<Vec<SyncConfig>> {
-        self._build_sync_configs(true)
-    }
+    pub fn load_tasks(&self) -> Result<Vec<SyncTask>> {
 
-    /// Same logic, but allows including inactive folders (for diagnostics)
-    pub fn _build_sync_configs(&self, active_only: bool) -> Result<Vec<SyncConfig>> {
         let mut out = Vec::new();
-
         let data_base = paths::app_data_dir()?;
 
         for device in &self.devices {
             for folder in &device.folders {
-                if active_only && !folder.enabled {
-                    continue;
-                }
 
                 let index_path = data_base
                     .join(&device.name)
                     .join(format!("{}.bin", unique_slug(&folder.target, &device.name)));
 
-                let source_path = PathBuf::from(&folder.source);
-                let target_path = PathBuf::from(&device.mount).join(&folder.target);
+                let source = PathBuf::from(&folder.source);
+                let target = PathBuf::from(&device.mount).join(&folder.target);
 
-                out.push(SyncConfig {
-                    device_name: device.name.clone(),
-                    source: source_path,
-                    target: target_path,
+                out.push(SyncTask {
+                    device: device.clone(),
+                    folder: folder.clone(),
                     index_path,
-                    enabled: folder.enabled,
+                    source,
+                    target,
                 });
             }
         }
@@ -132,13 +177,13 @@ impl AppConfig {
 }
 
 
-impl fmt::Display for SyncConfig {
+impl fmt::Display for SyncTask {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "[{} | {}] {} to {} (index: {})",
-            self.device_name,
-            if self.enabled { "enabled" } else { "disabled" },
+            "[{} | {}] {} → {} (index: {})",
+            self.device.name,
+            if self.folder.enabled { "enabled" } else { "disabled" },
             self.source.display(),
             self.target.display(),
             self.index_path.display(),
@@ -146,7 +191,7 @@ impl fmt::Display for SyncConfig {
     }
 }
 
-
+/// Display device with optional label
 impl fmt::Display for DeviceConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(label) = &self.label {
@@ -156,3 +201,4 @@ impl fmt::Display for DeviceConfig {
         }
     }
 }
+

@@ -4,7 +4,7 @@
 //! Command to run sync immediately for all configured folders.
 
 use anyhow::Result;
-use crate::config::{SyncConfig};
+use crate::config::{SyncTask};
 use crate::context::ExecutionContext;
 use crate::sync::run::sync_folder;
 use crate::sync::planner::plan_sync;
@@ -28,19 +28,19 @@ pub fn run_sync(ctx: &ExecutionContext, verbose: bool, no_progress: bool) -> Res
 }
 
 /// Sync a single mapping (source to target)
-fn sync_one(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Result<()> {
+fn sync_one(task: &SyncTask, verbose: bool, show_progress: bool) -> Result<()> {
     println!(
         "Checking local folder '{}'.",
-        conf.source.display(),
+        task.source.display(),
     );
 
-    match sync_folder(conf, verbose, show_progress) {
+    match sync_folder(task, verbose, show_progress) {
         Ok(_) => {
             println!("Synchronization completed.");
             Ok(())
         }
         Err(e) => {
-            println!("Error syncing device '{}': {}", conf.device_name, e);
+            println!("Error syncing device '{}': {}", task.device, e);
             Err(e)
         }
     }

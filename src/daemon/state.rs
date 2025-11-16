@@ -5,7 +5,7 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::config::SyncConfig;
+use crate::config::SyncTask;
 use crate::context::ExecutionContext;
 use crate::sync::engine::SyncEngine;
 use crate::sync::watcher::WatcherControl;
@@ -17,7 +17,7 @@ pub struct DaemonState {
     ctx: Arc<ExecutionContext>,
     engine: SyncEngine,
     watcher: WatcherControl,
-    active_syncs: Arc<Mutex<Vec<SyncConfig>>>,
+    active_syncs: Arc<Mutex<Vec<SyncTask>>>,
 }
 
 impl DaemonState {
@@ -60,7 +60,7 @@ impl DaemonState {
         if !plan.is_empty() && reason == "device mounted" {
             for cfg in plan {
                 if let Err(e) = self.engine.sync_config(&cfg) {
-                    tracing::error!("Initial sync error for '{}': {}", cfg.device_name, e);
+                    tracing::error!("Initial sync error for '{}': {}", cfg.device, e);
                 }
             }
         }
@@ -105,7 +105,7 @@ impl DaemonState {
         }
     }
 
-    pub fn active_syncs(&self) -> Vec<SyncConfig> {
+    pub fn active_syncs(&self) -> Vec<SyncTask> {
         self.active_syncs.lock().unwrap().clone()
     }
 }

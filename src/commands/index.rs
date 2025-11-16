@@ -11,6 +11,7 @@ use comfy_table::{Table, presets::{ASCII_FULL}, Cell};
 use crate::context::ExecutionContext;
 use crate::core::index::Index;
 use crate::utils::human::{human_size, human_date, shrink_middle};
+use crate::config::{SyncTaskFilter, SyncTask, SyncTaskExpand};
 
 const PATH_DISPLAY_LENGTH: usize = 80;
 
@@ -19,51 +20,46 @@ pub fn run_ls(
     ctx: &ExecutionContext,
     device: Option<&str>,
 ) -> Result<()> {
-    let all = ctx.config._build_sync_configs(false)?;
-    let all = ctx.expand_paths(all.iter().collect());
+    let tasks = ctx.config.load_tasks()?;
+    let mut tasks: Vec<SyncTask> = tasks.expanded(ctx);
 
-    if all.is_empty() {
-        println!("No folders configured for sync.");
-        return Ok(());
+    // If a device filter is provided, apply it
+    if let Some(dev) = device {
+        let dev = dev.trim();
+        tasks = tasks.clone().by_device(dev);
     }
 
-    let device_filter = device.unwrap_or("").trim();
-    let filtering = !device_filter.is_empty();
+    if tasks.is_empty() {
+        println!("No tasks found.");
+        return Ok(());
+    }
 
     let mut table = Table::new();
     table
         .load_preset(ASCII_FULL)
-        .set_header(["Device", "Source", "Target", "Index Path", "Last Modified", "Files", "Total Size"]);
+        .set_header(["Device", "Source", "Target", "Index Path", "Last Modified"]);
 
-    for sync_conf in all {
-        if filtering && sync_conf.device_name != device_filter {
-            continue;
-        }
-
-        let index = Index::load(&sync_conf.index_path)?;
+    for task in tasks {
+        let index = Index::load(&task.index_path)?;
 
         if !index.exists() {
             // If no index exists, show dashes
             table.add_row([
-                sync_conf.device_name.as_str(),
-                sync_conf.source.display().to_string().as_str(),
-                sync_conf.target.display().to_string().as_str(),
-                sync_conf.index_path.display().to_string().as_str(),
-                "-",
-                "-",
+                &task.device.to_string(),
+                task.source.to_str().unwrap_or(""),
+                task.target.to_str().unwrap_or(""),
+                task.index_path.to_str().unwrap_or(""),
                 "-",
             ]);
             continue;
         }
 
         table.add_row([
-            sync_conf.device_name.as_str(),
-            &sync_conf.source.display().to_string(),
-            &sync_conf.target.display().to_string(),
-            &sync_conf.index_path.display().to_string(),
+            &task.device.to_string(),
+            &task.source.display().to_string(),
+            &task.target.display().to_string(),
+            &task.index_path.display().to_string(),
             &human_date(index.generated_at),
-            &index.total_files.to_string(),
-            &crate::utils::human::human_size(index.total_size),
         ]);
     }
 
@@ -91,6 +87,7 @@ pub fn run_clear(ctx: &ExecutionContext, device: &str) -> Result<()> {
 
 /// Dump the contents of an index file to the console.
 pub fn run_dump(filepath: &str) -> Result<()> {
+    // Bypass config, just load index directly
     let idx = Index::load(Path::new(filepath))?;
 
     if !idx.exists() {
@@ -121,28 +118,28 @@ pub fn run_dump(filepath: &str) -> Result<()> {
 
 /// Command to display statistics about an index file.
 pub fn run_stats(ctx: &ExecutionContext, device: Option<&str>) -> anyhow::Result<()> {
-    let all = ctx.config._build_sync_configs(false)?;
+    let tasks = ctx.config.load_tasks()?;
+    let mut tasks: Vec<SyncTask> = tasks.expanded(ctx);
 
-    if all.is_empty() {
-        println!("No folders configured for sync.");
+    // If a device filter is provided, apply it
+    if let Some(dev) = device {
+        let dev = dev.trim();
+        tasks = tasks.clone().by_device(dev);
+    }
+
+    if tasks.is_empty() {
+        println!("No tasks found.");
         return Ok(());
     }
 
-    let device_filter = device.unwrap_or("").trim();
-    let filtering = !device_filter.is_empty();
-
-    for sync_conf in all {
-        if filtering && sync_conf.device_name != device_filter {
-            continue;
-        }
-
-        let idx = Index::load(&sync_conf.index_path)?;
+    for task in tasks {
+        let idx = Index::load(&task.index_path)?;
 
         if !idx.exists() {
             println!(
                 "No index found for device {} at {}",
-                sync_conf.device_name,
-                sync_conf.index_path.display()
+                task.device,
+                task.index_path.display()
             );
             continue;
         }
@@ -171,7 +168,7 @@ pub fn run_stats(ctx: &ExecutionContext, device: Option<&str>) -> anyhow::Result
             summary.add_row(["Oldest file", &format!("{} ({})", shrink_middle(&f.path, PATH_DISPLAY_LENGTH), human_date(f.mtime))]);
         }
 
-        println!("{}", sync_conf.index_path.display());
+        println!("\n{}", task.index_path.display());
         println!("{summary}");
     }
 

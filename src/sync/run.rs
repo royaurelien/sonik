@@ -6,7 +6,7 @@
 use anyhow::Result;
 use std::time::Instant;
 
-use crate::config::SyncConfig;
+use crate::config::SyncTask;
 use crate::core::{
     diff::compute_diff,
     index::{Index, IndexedFile},
@@ -41,19 +41,19 @@ fn compute_sync_stats(diff: &crate::core::diff::Diff, previous: &[IndexedFile]) 
 }
 
 /// Perform a full sync for one folder pair
-pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Result<()> {
-    tracing::debug!("Sync folder called for {}", conf.device_name);
+pub fn sync_folder(task: &SyncTask, verbose: bool, show_progress: bool) -> Result<()> {
+    tracing::debug!("Sync folder called for {}", task.device);
     
     let start = Instant::now();
 
     // Ensure destination exists and is writable
-    validate_sync_paths(&conf.source, &conf.target, TEST_WRITE)?;
+    validate_sync_paths(&task.source, &task.target, TEST_WRITE)?;
 
     // Load previous index (empty if missing)
-    let mut idx = Index::load(&conf.index_path)?; 
+    let mut idx = Index::load(&task.index_path)?; 
 
     // Scan source
-    let local_files = scan_local(&conf.source)?;
+    let local_files = scan_local(&task.source)?;
     let diff = compute_diff(&local_files, &idx.files);    
 
 
@@ -61,7 +61,7 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
     if !idx.exists() {
         idx.update(local_files.clone())?;
 
-        tracing::info!("Initialized index for {}.", conf.device_name);
+        tracing::info!("Initialized index for {}.", task.device);
 
         // If diff empty, nothing more to do
         if diff.to_upload.is_empty() && diff.to_delete.is_empty() {
@@ -71,18 +71,18 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
 
     // Nothing to sync
     if diff.to_upload.is_empty() && diff.to_delete.is_empty() {
-        println!("Nothing to synchronize for {}, everything is up to date.", conf.device_name);
+        println!("Nothing to synchronize for {}, everything is up to date.", task.device);
         return Ok(());
     }
 
     // Compute sync statistics
     let stats = compute_sync_stats(&diff, &idx.files);
 
-    println!("Preparing sync from {} to {}.", conf.source.display(), conf.target.display());
+    println!("Preparing sync from {} to {}.", task.source.display(), task.target.display());
     println!("Planned: {}", stats.format_summary());
 
     notify(
-        &format!("Sync started for {}", conf.device_name),
+        &format!("Sync started for {}", task.device),
         &stats.format_summary()
     );
 
@@ -101,8 +101,8 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
     };    
 
     // Perform sync operations using batch functions
-    let done_upload = upload_batch(&conf.source, &conf.target, &diff.to_upload, pb.as_ref(), verbose)?;
-    let done_delete = delete_batch(&conf.target, &diff.to_delete, pb.as_ref(), verbose)?;
+    let done_upload = upload_batch(&task.source, &task.target, &diff.to_upload, pb.as_ref(), verbose)?;
+    let done_delete = delete_batch(&task.target, &diff.to_delete, pb.as_ref(), verbose)?;
 
     if let Some(pb) = pb { pb.finish(); }
 
@@ -117,7 +117,7 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
     );
 
     notify(
-        &format!("Sync completed for {}", conf.device_name),
+        &format!("Sync completed for {}", task.device),
         &format!(
             "{} uploaded ({}), {} deleted ({}) in {:.2?}",
             done_upload,

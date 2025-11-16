@@ -8,7 +8,7 @@ use users::{get_current_uid, get_user_by_uid};
 use std::env;
 use std::path::PathBuf;
 
-use crate::config::{AppConfig, SyncConfig, DeviceConfig};
+use crate::config::{AppConfig, DeviceConfig};
 use crate::utils::paths;
 #[derive(Clone, Debug)]
 pub struct EnvContext {
@@ -77,21 +77,10 @@ impl ExecutionContext {
     
     }
 
-    pub fn expand_path(&self, raw: &SyncConfig) -> SyncConfig {
-        SyncConfig {
-            device_name: raw.device_name.clone(),
-            source: self.expander.expand(raw.source.to_str().unwrap(), raw.device_name.as_str()),
-            target: self.expander.expand(raw.target.to_str().unwrap(), raw.device_name.as_str()),
-            index_path: raw.index_path.clone(),
-            enabled: raw.enabled,
-        }
-    }
-    pub fn expand_paths(&self, raw: Vec<&SyncConfig>) -> Vec<SyncConfig> {
-        raw.into_iter().map(|conf| self.expand_path(conf)).collect()
-    }
-
+    // Expand mount path for a DeviceConfig according to the current context.
     pub fn expand_mount(&self, dev: &DeviceConfig) -> PathBuf {
         self.expander.expand(&dev.mount, dev.name.as_str())
     }    
      
 }
+

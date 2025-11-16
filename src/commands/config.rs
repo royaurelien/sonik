@@ -6,7 +6,7 @@
 use anyhow::Result;
 use crate::context::ExecutionContext;
 use crate::utils::editor::open_in_default_editor;
-use crate::config::AppConfig;
+use crate::config::{AppConfig, SyncTask, SyncTaskFilter, SyncTaskExpand};
 
 pub fn run_edit() -> anyhow::Result<()> {
     let conf_path = AppConfig::filepath()?;
@@ -18,7 +18,8 @@ pub fn run_edit() -> anyhow::Result<()> {
 
 // Show the current sync configuration.
 pub fn run_show(ctx: &ExecutionContext) -> Result<()> {
-    let sync_confs = ctx.config._build_sync_configs(false)?;
+    let tasks = ctx.config.load_tasks()?;
+    let tasks: Vec<SyncTask> = tasks.expanded(ctx);
     let devices = &ctx.config.devices;
 
     if devices.is_empty() {
@@ -28,33 +29,28 @@ pub fn run_show(ctx: &ExecutionContext) -> Result<()> {
 
     for dev in devices {
         
-        println!("\nDevices:");
+        println!("\nDevice:");
         println!("  Name: {}", dev);
         println!("  Mount path: {}", ctx.expand_mount(&dev).to_str().unwrap_or(""));
         println!("  Use mountinfo: {}", dev.mountinfo);
 
 
-        // Now find matching SyncConfigs (expanded folders, absolute paths, index paths)
-        let matching: Vec<_> = sync_confs
-            .iter()
-            .filter(|sc| sc.device_name == dev.name)
-            .collect();
+        // Now find matching SyncTasks for this device
+        let filtered: Vec<_> = tasks.clone().by_device(&dev.name);
 
-        if matching.is_empty() {
+        if filtered.is_empty() {
             println!("  (No resolved sync folders for this device)");
             continue;
         }
 
-        let matching = ctx.expand_paths(matching);
-
         println!("  Folders:");
 
-        for sc in matching {
+        for task in filtered {
             println!("    Folder:");
-            println!("      Source: {}", sc.source.display());
-            println!("      Target: {}", sc.target.display());
-            println!("      Index : {}", sc.index_path.display());
-            println!("      Enabled : {}", sc.enabled);
+            println!("      Source: {}", task.source.display());
+            println!("      Target: {}", task.target.display());
+            println!("      Index : {}", task.index_path.display());
+            println!("      Enabled : {}", task.folder.enabled);
         }
     }
 
