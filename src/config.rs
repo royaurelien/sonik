@@ -147,3 +147,12 @@ impl fmt::Display for SyncConfig {
 }
 
 
+impl fmt::Display for DeviceConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(label) = &self.label {
+            write!(f, "{} ({})", label, self.name)
+        } else {
+            write!(f, "{}", self.name)
+        }
+    }
+}

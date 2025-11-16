@@ -4,4 +4,4 @@ watch:
   enabled: true
   debounce_ms: 300
 
-device:
+devices:

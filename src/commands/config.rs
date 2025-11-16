@@ -27,8 +27,9 @@ pub fn run_show(ctx: &ExecutionContext) -> Result<()> {
     }
 
     for dev in devices {
+        
         println!("\nDevices:");
-        println!("  Name: {}", dev.name);
+        println!("  Name: {}", dev);
         println!("  Mount path: {}", ctx.expand_mount(&dev).to_str().unwrap_or(""));
         println!("  Use mountinfo: {}", dev.mountinfo);
 

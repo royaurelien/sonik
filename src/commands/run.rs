@@ -10,7 +10,7 @@ use crate::sync::run::sync_folder;
 use crate::sync::planner::plan_sync;
 
 /// Run sync immediately for all devices defined in the config.
-pub fn run_now(ctx: &ExecutionContext, verbose: bool, no_progress: bool) -> Result<()> {
+pub fn run_sync(ctx: &ExecutionContext, verbose: bool, no_progress: bool) -> Result<()> {
     tracing::info!("Starting Plainsync run");
 
     let plan = plan_sync(ctx)?;

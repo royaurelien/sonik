@@ -18,6 +18,7 @@ It performs **diff-based transfers** with **no unnecessary writes**, preserving 
 - Binary index for fast comparison
 - Multi-device support with a simple YAML config
 - Progress bars and detailed statistics
+- User notifications for both CLI and daemon modes
 
 ## Installation
 
@@ -83,7 +84,7 @@ You may define **multiple devices and folders**.
 Manual sync:
 
 ```bash
-plainsync sync run
+plainsync run
 ```
 
 Daemon:
@@ -165,6 +166,12 @@ cargo clippy
 ```
 
 ## Troubleshooting
+
+**Stale index issues**  
+Clean index:
+```bash
+plainsync index clean <device>
+```
 
 **Device not detected**  
 Check real mount directory:

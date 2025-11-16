@@ -12,7 +12,7 @@ use crate::context::ExecutionContext;
 use crate::sync::detect::detect_all_devices;
 
 /// Compute a list of SyncConfig that point to mounted devices.
-/// This is used by both the daemon and the run_now CLI command.
+/// This is used by both the daemon and the run_sync CLI command.
 pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncConfig>> {
     // Step 1: build all possible sync configs from YAML
     let all = ctx.config.build_sync_configs()?;

@@ -19,20 +19,20 @@ struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Sync commands
-    Sync(SyncCommands),
+    /// Synchronization operations
+    Run {
+        #[arg(long)]
+        no_progress_bar: bool,
+
+        #[arg(short, long)]
+        verbose: bool,
+    },
 
     /// Manage configuration
     Config(ConfigCommands),
 
     /// Index management
     Index(IndexCommands),
-}
-
-#[derive(Parser)]
-pub struct SyncCommands {
-    #[command(subcommand)]
-    pub command: SyncSubcommands,
 }
 
 #[derive(Subcommand)]
@@ -101,10 +101,8 @@ fn main() -> Result<()> {
     let ctx = ExecutionContext::from_default_config()?;
 
     match cli.command {
-        Commands::Sync(cmd) => match cmd.command {
-            SyncSubcommands::Run { verbose, no_progress_bar } =>
-                commands::run::run_now(&ctx, verbose, no_progress_bar)?,
-        },
+        Commands::Run { verbose, no_progress_bar } =>
+            commands::run::run_sync(&ctx, verbose, no_progress_bar)?,
 
         Commands::Config(cmd) => match cmd.command {
             ConfigSubcommands::Show =>
