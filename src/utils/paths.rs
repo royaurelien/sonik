@@ -53,15 +53,24 @@ impl PathExpander {
         Self { ctx }
     }
 
+    /// Perform all necessary transformations on the paths
+    /// so that they can be used in processing.
     pub fn expand(&self, input: &str, device: &str) -> PathBuf {
         let mut out = input.to_string();
 
-        // Expand ~/
-        if let Some(s) = out.strip_prefix("~/") {
-            out = format!("{}/{}", self.ctx.home, s);
+
+        // Expand ~/ prefix
+        if let Some(suffix) = out.strip_prefix("~/") {
+            out = format!("{}/{}", self.ctx.home, suffix);
         }
 
-        // Replace variables
+        // POSIX-style variables: $HOME, $USER, etc.
+        // This allows things like `$HOME/Music`, `$XDG_MUSIC_DIR`, etc.
+        out = shellexpand::env_with_context_no_errors(&out, |var| {
+            std::env::var(var).ok()
+        }).into_owned();
+
+        // Expand custom placeholders: {home}, {user}, {uid}, {device}
         let replacements = [
             ("{home}",  self.ctx.home.as_str()),
             ("{user}",  self.ctx.user.as_str()),
@@ -73,6 +82,15 @@ impl PathExpander {
             out = out.replace(key, val);
         }
 
-        PathBuf::from(out)
+        // Convert to PathBuf
+        let p = PathBuf::from(&out);
+
+        // Absolute path? Keep it as-is.
+        if p.is_absolute() {
+            return p;
+        }
+
+        // Relative path interpret from HOME
+        PathBuf::from(&self.ctx.home).join(p)
     }
 }
