@@ -1,17 +1,13 @@
 # Sonik
 
-<div style="color:#0F52BA; text-align:center; font-size:1.4em; font-weight:600; letter-spacing:0.5px;">
-  Fast diff-based sync for devices
-</div>
-
 ![Love](https://img.shields.io/badge/Made%20with%20%E2%9D%A4-Rust-orange)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 [![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
 
-Originally built for the Innoasis Y1 MP3 player, Sonik focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).
+## Fast diff-based sync for devices
 
-It performs **diff-based transfers** with **no unnecessary writes**, preserving your device’s lifespan.
-
+Originally built for the Innoasis Y1 MP3 player, Sonik focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).  
+It performs **diff-based transfers** with **no unnecessary writes**, preserving your device’s lifespan.  
 **Fast**, **minimal**, and **adaptable**, it can easily extend to other targets beyond music players.
 
 ## Features
