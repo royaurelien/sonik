@@ -129,26 +129,28 @@ The daemon (`sonikd`) handles:
 - directory watching (via inotify)  
 - debounced event processing  
 
+### File Change Detection
+
 ```mermaid
-graph TB
-    User[User] -->|sonik sync run| CLI[CLI]
-    User -->|sonikd| Daemon[Daemon]
-
-    CLI --> Config[Load Config]
-    Config --> SyncEngine[Sync Engine]
-    SyncEngine --> Operations[Sync Operations]
-    Operations --> Device[Device]
-
-    Daemon --> Config2[Load Config]
-    Daemon --> DaemonState[Daemon State]
-    DaemonState --> Watcher[File Watcher]
-    DaemonState --> Detector[Device Detector]
-
-    Watcher -->|File events| DaemonState
-    Detector -->|Mount events| DaemonState
-    DaemonState --> SyncEngine2[Sync Engine]
-    SyncEngine2 --> Operations2[Sync Operations]
-    Operations2 --> Device
+stateDiagram-v2
+    [*] --> CheckPath
+    CheckPath --> New : Not in index
+    CheckPath --> CheckSize : In index
+    
+    CheckSize --> Modified : Size differs
+    CheckSize --> CheckMtime : Size same
+    
+    CheckMtime --> Modified : Mtime differs
+    CheckMtime --> Unchanged : Mtime same
+    
+    New --> [*] : Upload
+    Modified --> [*] : Upload
+    Unchanged --> [*] : Skip
+    
+    note right of CheckMtime
+        mtime = modification time
+        from filesystem metadata
+    end note
 ```
 
 ## Requirements
