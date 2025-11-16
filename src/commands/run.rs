@@ -4,7 +4,7 @@
 //! Command to run sync immediately for all configured folders.
 
 use anyhow::Result;
-use crate::config::{SyncTask};
+use crate::core::task::SyncTask;
 use crate::context::ExecutionContext;
 use crate::sync::run::sync_folder;
 use crate::sync::planner::plan_sync;

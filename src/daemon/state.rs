@@ -5,7 +5,7 @@
 
 use std::sync::{Arc, Mutex};
 
-use crate::config::SyncTask;
+use crate::core::task::SyncTask;
 use crate::context::ExecutionContext;
 use crate::sync::engine::SyncEngine;
 use crate::sync::watcher::WatcherControl;

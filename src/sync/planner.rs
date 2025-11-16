@@ -7,10 +7,9 @@
 use anyhow::Result;
 use std::collections::HashSet;
 
-use crate::config::SyncTask;
 use crate::context::ExecutionContext;
 use crate::sync::detect::detect_all_devices;
-use crate::config::{SyncTaskFilter, SyncTaskExpand};
+use crate::core::task::{SyncTask, SyncTaskFilter, SyncTaskExpand};
 
 /// Compute a list of SyncTask that point to mounted devices.
 /// This is used by both the daemon and the run_sync CLI command.

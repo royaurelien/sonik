@@ -7,7 +7,7 @@ use std::sync::{Arc, Mutex};
 use anyhow::Result;
 use notify::Event;
 
-use crate::config::SyncTask;
+use crate::core::task::SyncTask;
 use crate::sync::run::sync_folder;
 
 /// Stateless sync engine: it only executes syncs.

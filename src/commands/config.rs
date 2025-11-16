@@ -6,7 +6,8 @@
 use anyhow::Result;
 use crate::context::ExecutionContext;
 use crate::utils::editor::open_in_default_editor;
-use crate::config::{AppConfig, SyncTask, SyncTaskFilter, SyncTaskExpand};
+use crate::config::AppConfig;
+use crate::core::task::{SyncTask, SyncTaskFilter, SyncTaskExpand};
 
 pub fn run_edit() -> anyhow::Result<()> {
     let conf_path = AppConfig::filepath()?;

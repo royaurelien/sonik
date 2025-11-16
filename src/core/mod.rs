@@ -6,3 +6,4 @@
 pub mod diff;
 pub mod index;
 pub mod scanner;
+pub mod task;

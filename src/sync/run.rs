@@ -6,10 +6,10 @@
 use anyhow::Result;
 use std::time::Instant;
 
-use crate::config::SyncTask;
+use crate::core::task::SyncTask;
 use crate::core::{
     diff::compute_diff,
-    index::{Index, IndexedFile},
+    index::IndexedFile,
     scanner::scan_local,
 };
 use crate::utils::human::{human_size, notify, SyncStats};
@@ -50,7 +50,7 @@ pub fn sync_folder(task: &SyncTask, verbose: bool, show_progress: bool) -> Resul
     validate_sync_paths(&task.source, &task.target, TEST_WRITE)?;
 
     // Load previous index (empty if missing)
-    let mut idx = Index::load(&task.index_path)?; 
+    let mut idx = task.load_index()?; 
 
     // Scan source
     let local_files = scan_local(&task.source)?;

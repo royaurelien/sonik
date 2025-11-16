@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use crate::utils::slug::unique_slug;
 use crate::utils::paths;
-use crate::context::ExecutionContext;
+use crate::core::task::SyncTask;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
 
@@ -45,69 +45,6 @@ pub struct FolderConfig {
     pub source: String,
     pub target: String,
     pub enabled: bool,
-}
-
-/// Runtime structure used for each sync operation.
-/// Holds full DeviceConfig + FolderConfig.
-#[derive(Debug, Clone)]
-pub struct SyncTask {
-    pub device: DeviceConfig,
-    pub folder: FolderConfig,
-
-    // runtime-only
-    pub index_path: PathBuf,
-    pub source: PathBuf,
-    pub target: PathBuf,
-}
-
-pub trait SyncTaskFilter {
-    fn by_device(self, name: &str) -> Vec<SyncTask>;
-    fn enabled(self) -> Vec<SyncTask>;
-    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask>;
-}
-
-impl SyncTaskFilter for Vec<SyncTask> {
-    fn by_device(self, name: &str) -> Vec<SyncTask> {
-        self.into_iter()
-            .filter(|c| c.device.name == name)
-            .collect()
-    }
-
-    fn enabled(self) -> Vec<SyncTask> {
-        self.into_iter()
-            .filter(|item| item.folder.enabled)
-            .collect()
-    }
-
-    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask> {
-        self.into_iter()
-            .filter(|item| names.contains(item.device.name.as_str()))
-            .collect()
-    }
-
-}
-
-impl SyncTask {
-    // Return a new SyncTask with expanded source and target paths.
-    pub fn expanded(&self, ctx: &ExecutionContext) -> Self {
-        SyncTask {
-            source: ctx.expander.expand(self.source.to_str().unwrap(), self.device.name.as_str()),
-            target: ctx.expander.expand(self.target.to_str().unwrap(), self.device.name.as_str()),
-            ..self.clone()
-        }
-    }
-}
-
-pub trait SyncTaskExpand {
-    fn expanded(self, ctx: &ExecutionContext) -> Vec<SyncTask>;
-}
-
-impl SyncTaskExpand for Vec<SyncTask> {
-    fn expanded(self, ctx: &ExecutionContext) -> Vec<SyncTask> {
-        self.into_iter()
-            .map(|t| t.expanded(ctx))
-            .collect()
-    }
 }
 
 impl AppConfig {

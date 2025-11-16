@@ -11,7 +11,7 @@ use comfy_table::{Table, presets::{ASCII_FULL}, Cell};
 use crate::context::ExecutionContext;
 use crate::core::index::Index;
 use crate::utils::human::{human_size, human_date, shrink_middle};
-use crate::config::{SyncTaskFilter, SyncTask, SyncTaskExpand};
+use crate::core::task::{SyncTask, SyncTaskFilter, SyncTaskExpand};
 
 const PATH_DISPLAY_LENGTH: usize = 80;
 
@@ -40,7 +40,7 @@ pub fn run_ls(
         .set_header(["Device", "Source", "Target", "Index Path", "Last Modified"]);
 
     for task in tasks {
-        let index = Index::load(&task.index_path)?;
+        let index = task.load_index()?;
 
         if !index.exists() {
             // If no index exists, show dashes
@@ -133,7 +133,7 @@ pub fn run_stats(ctx: &ExecutionContext, device: Option<&str>) -> anyhow::Result
     }
 
     for task in tasks {
-        let idx = Index::load(&task.index_path)?;
+        let idx = task.load_index()?;
 
         if !idx.exists() {
             println!(
