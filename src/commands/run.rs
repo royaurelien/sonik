@@ -10,7 +10,7 @@ use crate::sync::run::sync_folder;
 use crate::sync::planner::plan_sync;
 
 /// Run sync immediately for all devices defined in the config.
-pub fn run_now(ctx: &ExecutionContext, verbose: bool, show_progress: bool) -> Result<()> {
+pub fn run_now(ctx: &ExecutionContext, verbose: bool, no_progress: bool) -> Result<()> {
     tracing::info!("Starting Sonik run");
 
     let plan = plan_sync(ctx)?;
@@ -21,25 +21,22 @@ pub fn run_now(ctx: &ExecutionContext, verbose: bool, show_progress: bool) -> Re
     }
 
     for conf in plan {
-        sync_one(&conf, verbose, show_progress)?;
+        sync_one(&conf, verbose, !no_progress)?;
     }
 
-    println!("Sync complete.");
     Ok(())
 }
 
 /// Sync a single mapping (source to target)
 fn sync_one(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Result<()> {
     println!(
-        "Syncing '{}' to '{}' (device: {})",
+        "Checking local folder '{}'.",
         conf.source.display(),
-        conf.target.display(),
-        conf.device_name,
     );
 
     match sync_folder(conf, verbose, show_progress) {
         Ok(_) => {
-            println!("Sync for device '{}' completed successfully.", conf.device_name);
+            println!("Synchronization completed.");
             Ok(())
         }
         Err(e) => {

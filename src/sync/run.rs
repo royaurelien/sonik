@@ -71,15 +71,15 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
 
     // Nothing to sync
     if diff.to_upload.is_empty() && diff.to_delete.is_empty() {
-        tracing::info!("Nothing to synchronize for {}, everything is up to date.", conf.device_name);
+        println!("Nothing to synchronize for {}, everything is up to date.", conf.device_name);
         return Ok(());
     }
 
     // Compute sync statistics
     let stats = compute_sync_stats(&diff, &idx.files);
 
-    tracing::info!("Preparing sync for {} to {}", conf.source.display(), conf.target.display());
-    tracing::info!("Changes: {}", stats.format_summary());
+    println!("Preparing sync from {} to {}.", conf.source.display(), conf.target.display());
+    println!("Planned: {}", stats.format_summary());
 
     notify(
         &format!("Sync started for {}", conf.device_name),
@@ -111,13 +111,9 @@ pub fn sync_folder(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Res
 
     let elapsed = start.elapsed();
 
-    tracing::info!(
-        "Sync completed in {:.2?}: {} uploaded ({}), {} deleted ({})",
+    println!(
+        "Completed in {:.2?}.",
         elapsed,
-        done_upload,
-        human_size(stats.upload_bytes),
-        done_delete,
-        human_size(stats.delete_bytes)
     );
 
     notify(
