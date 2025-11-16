@@ -3,7 +3,7 @@
 
 //! Unit tests for utility modules
 
-use sonik::utils::{slug, human, paths};
+use plainsync::utils::{slug, human, paths};
 
 #[cfg(test)]
 mod slug_tests {
@@ -156,7 +156,7 @@ mod paths_tests {
         let result = paths::app_data_dir();
         assert!(result.is_ok(), "app_data_dir should return a valid path");
         let path = result.unwrap();
-        assert!(path.to_string_lossy().contains("sonik"), "Should contain 'sonik'");
+        assert!(path.to_string_lossy().contains("plainsync"), "Should contain 'plainsync'");
     }
 
     #[test]
@@ -164,7 +164,7 @@ mod paths_tests {
         let result = paths::app_config_dir();
         assert!(result.is_ok(), "app_config_dir should return a valid path");
         let path = result.unwrap();
-        assert!(path.to_string_lossy().contains("sonik"), "Should contain 'sonik'");
+        assert!(path.to_string_lossy().contains("plainsync"), "Should contain 'plainsync'");
     }
 
     #[test]

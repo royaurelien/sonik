@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // src/core/mod.rs
 
-//! Core module for Sonik application.
+//! Core module for Plainsync application.
 
 pub mod diff;
 pub mod index;

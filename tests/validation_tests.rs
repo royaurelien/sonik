@@ -3,7 +3,7 @@
 
 //! Unit tests for sync validation module
 
-use sonik::sync::validation;
+use plainsync::sync::validation;
 use std::fs;
 use tempfile::TempDir;
 

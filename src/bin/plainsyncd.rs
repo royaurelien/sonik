@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
-// src/bin/sonikd.rs
+// src/bin/plainsyncd.rs
 
-//! Main daemon entry point for Sonik application.
+//! Main daemon entry point for Plainsync application.
 
 use anyhow::Result;
 use tracing_subscriber::EnvFilter;
 
-use sonik::daemon::state::DaemonState;
-use sonik::sync::detect_loop::{start_detect_loop, DetectCallbacks};
-use sonik::sync::engine::SyncEngine;
-use sonik::sync::watcher::start_watcher;
-use sonik::context::ExecutionContext;
+use plainsync::daemon::state::DaemonState;
+use plainsync::sync::detect_loop::{start_detect_loop, DetectCallbacks};
+use plainsync::sync::engine::SyncEngine;
+use plainsync::sync::watcher::start_watcher;
+use plainsync::context::ExecutionContext;
 
 // À mettre au niveau module, pas dans main()
 static DAEMON_STATE: once_cell::sync::OnceCell<DaemonState> = once_cell::sync::OnceCell::new();
@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     tracing_subscriber::fmt()
     .with_env_filter(EnvFilter::from_default_env())
     .init();
-    tracing::info!("Sonik daemon starting…");
+    tracing::info!("Plainsync daemon starting…");
 
     // 1. Build execution context
     let ctx = ExecutionContext::from_default_config()?;

@@ -29,14 +29,14 @@ pub fn home_dir() -> Result<PathBuf> {
         .context("Failed to locate user home directory")
 }
 
-/// Get sonik data directory
+/// Get plainsync data directory
 pub fn app_data_dir() -> Result<PathBuf> {
-    Ok(data_dir()?.join("sonik"))
+    Ok(data_dir()?.join("plainsync"))
 }
 
-/// Get sonik config directory
+/// Get plainsync config directory
 pub fn app_config_dir() -> Result<PathBuf> {
-    Ok(config_dir()?.join("sonik"))
+    Ok(config_dir()?.join("plainsync"))
 }
 
 /// Ensure directory exists

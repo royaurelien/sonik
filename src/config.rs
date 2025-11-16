@@ -58,7 +58,7 @@ pub struct SyncConfig {
 
 
 impl AppConfig {
-    /// Return path: ~/.config/sonik/config.yaml
+    /// Return path: ~/.config/plainsync/config.yaml
     pub fn filepath() -> Result<PathBuf> {
         let base = paths::app_config_dir()?;
         Ok(base.join("config.yaml"))

@@ -1,4 +1,4 @@
-name: Build & Release Sonik
+name: Build & Release Plainsync
 
 permissions:
   contents: write
@@ -37,14 +37,14 @@ jobs:
         run: |
           cargo deb --no-build --target x86_64-unknown-linux-musl
           mkdir -p dist
-          cp target/x86_64-unknown-linux-musl/release/sonik dist/sonik
-          cp target/x86_64-unknown-linux-musl/release/sonikd dist/sonikd
+          cp target/x86_64-unknown-linux-musl/release/plainsync dist/plainsync
+          cp target/x86_64-unknown-linux-musl/release/plainsyncd dist/plainsyncd
           cp target/debian/*.deb dist/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sonik-build
+          name: plainsync-build
           path: dist/*
 
   release:
@@ -56,7 +56,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: sonik-build
+          name: plainsync-build
           path: ./dist
 
       - name: Publish GitHub Release

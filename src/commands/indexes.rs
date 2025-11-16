@@ -59,7 +59,7 @@ pub fn run_clear(ctx: &ExecutionContext, device: &str) -> Result<()> {
         return Ok(());
     }
 
-    println!("Removing all Sonik index files in {}", target_dir.display());
+    println!("Removing all Plainsync index files in {}", target_dir.display());
     fs::remove_dir_all(&target_dir)?;
 
     println!("Done. Index will rebuild automatically on next sync.");

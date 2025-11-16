@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-// src/bin/sonik.rs
+// src/bin/plainsync.rs
 
-//! Main CLI entry point for Sonik application.
+//! Main CLI entry point for Plainsync application.
 
-use sonik::commands;
-use sonik::context::ExecutionContext;
+use plainsync::commands;
+use plainsync::context::ExecutionContext;
 
 use clap::{Parser, Subcommand};
 use anyhow::Result;
@@ -95,7 +95,7 @@ fn main() -> Result<()> {
         .with_writer(std::io::stderr)
         .init();
 
-    tracing::info!("Sonik starting…");
+    tracing::info!("Plainsync starting…");
 
     let cli = Cli::parse();
     let ctx = ExecutionContext::from_default_config()?;

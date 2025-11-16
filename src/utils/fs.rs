@@ -10,7 +10,7 @@ use std::fs;
 
 /// Ensure path is writable
 pub fn ensure_writable(path: &Path) -> anyhow::Result<()> {
-    let test = path.join(".sonik_test");
+    let test = path.join("._test");
     std::fs::write(&test, b"ok")?;
     std::fs::remove_file(test)?;
     Ok(())

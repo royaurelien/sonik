@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // src/sync/mod.rs
 
-//! Sync module for Sonik application.
+//! Sync module for Plainsync application.
 
 pub mod detect;
 pub mod detect_loop;

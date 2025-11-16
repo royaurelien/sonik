@@ -1,5 +1,5 @@
 [package]
-name = "sonik"
+name = "plainsync"
 version = "1.0.0"
 edition = "2021"
 authors = ["Aurelien ROY <roy.aurelien@etik.com>"]
@@ -7,17 +7,17 @@ license = "MIT"
 readme = "README.md"
 categories = ["command-line-utilities"]
 description = "Fast, diff-based sync utility for music devices and other targets."
-documentation = "https://github.com/royaurelien/sonik"
-repository = "https://github.com/royaurelien/sonik"
+documentation = "https://github.com/toolsforfolk/plainsync"
+repository = "https://github.com/toolsforfolk/plainsync"
 publish = false
 
 [[bin]]
-name = "sonik"
-path = "src/bin/sonik.rs"
+name = "plainsync"
+path = "src/bin/plainsync.rs"
 
 [[bin]]
-name = "sonikd"
-path = "src/bin/sonikd.rs"
+name = "plainsyncd"
+path = "src/bin/plainsyncd.rs"
 
 [dependencies]
 anyhow = "1"
@@ -52,14 +52,14 @@ tempfile = "3.23.0"
 [package.metadata.deb]
 maintainer = "Aurelien ROY <roy.aurelien@etik.com>"
 extended-description = """\
-Sonik focuses on syncing folders, \
+Plainsync focuses on syncing folders, \
 It performs diff-based transfers with no unnecessary writes, preserving the lifespan of your device. \
 Fast, minimal, and adaptable, It can easily extend to other targets beyond music players."""
 section = "utility"
 priority = "optional"
 assets = [
-  ["target/release/sonik", "/usr/bin/sonik", "755"],
-  ["target/release/sonikd", "/usr/bin/sonikd", "755"],
-  ["packaging/systemd/sonik.service", "/usr/lib/systemd/user/sonik.service", "644"]
+  ["target/release/plainsync", "/usr/bin/plainsync", "755"],
+  ["target/release/plainsyncd", "/usr/bin/plainsyncd", "755"],
+  ["packaging/systemd/plainsync.service", "/usr/lib/systemd/user/plainsync.service", "644"]
 ]
 maintainer-scripts = "packaging/debian"

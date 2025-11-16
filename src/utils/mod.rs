@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // src/utils/mod.rs
 
-//! Utility module for Sonik application.
+//! Utility module for Plainsync application.
 
 pub mod slug;
 pub mod human;

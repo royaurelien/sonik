@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // src/context.rs
 
-//! Execution context for Sonik application, including configuration, 
+//! Execution context for Plainsync application, including configuration, 
 //! environment details and path expansion.
 
 use users::{get_current_uid, get_user_by_uid};

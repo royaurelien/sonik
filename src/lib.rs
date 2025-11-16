@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // src/lib.rs
 
-//! Main library module for Sonik application.
+//! Main library module for Plainsync application.
 
 pub mod commands;
 pub mod config;

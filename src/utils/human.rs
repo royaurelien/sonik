@@ -31,7 +31,7 @@ pub fn human_date(ts: i64) -> String {
 
 pub fn notify(summary: &str, body: &str) {
     notify_rust::Notification::new()
-        .appname("Sonik")
+        .appname("Plainsync")
         .summary(summary)
         .body(body)
         .show()

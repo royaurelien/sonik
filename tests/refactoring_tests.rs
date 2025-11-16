@@ -2,7 +2,7 @@
 
 #[cfg(test)]
 mod tests {
-    use sonik::utils::human::{human_size, SyncStats};
+    use plainsync::utils::human::{human_size, SyncStats};
 
     #[test]
     fn test_format_bytes() {

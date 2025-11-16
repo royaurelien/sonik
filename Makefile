@@ -1,4 +1,4 @@
-# Makefile for sonik
+# Makefile for plainsync
 
 FAKE_SCRIPT=./fake-device.sh
 
@@ -21,13 +21,13 @@ install:
 
 uninstall:
 	cargo uninstall || true
-	sudo apt remove sonik || true
+	sudo apt remove plainsync || true
 
 deb:
-	sudo apt remove sonik || true
+	sudo apt remove plainsync || true
 	cargo build --release
 	cargo deb --no-build
-	sudo dpkg -i target/debian/sonik_*.deb
+	sudo dpkg -i target/debian/plainsync_*.deb
 
 clean:
 	cargo clean

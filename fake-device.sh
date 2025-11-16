@@ -2,7 +2,7 @@
 set -e
 
 IMAGE="fake-device.img"
-SIZE_MB=$((1024 * 8))  # 8GB
+SIZE_MB=$((1024 * 2))  # 2GB
 LABEL="FAKEDEVICE"
 
 # Return the unique loop device associated to the image

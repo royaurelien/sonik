@@ -3,18 +3,18 @@ set -e
 
 # If this is a remove (but not purge), stop the service for the current user
 if [ "$1" = "remove" ]; then
-    su "$SUDO_USER" -c "systemctl --user stop sonik.service" || true
+    su "$SUDO_USER" -c "systemctl --user stop plainsync.service" || true
 fi
 
 # If this is a purge, disable and remove user links
 if [ "$1" = "purge" ]; then
-    su "$SUDO_USER" -c "systemctl --user disable sonik.service" || true
-    su "$SUDO_USER" -c "systemctl --user stop sonik.service" || true
+    su "$SUDO_USER" -c "systemctl --user disable plainsync.service" || true
+    su "$SUDO_USER" -c "systemctl --user stop plainsync.service" || true
 
     # Remove user-level overrides/config if any
     USER_SYSTEMD_DIR=$(eval echo "~$SUDO_USER/.config/systemd/user")
-    rm -f "$USER_SYSTEMD_DIR/default.target.wants/sonik.service" || true
-    rm -f "$USER_SYSTEMD_DIR/sonik.service" || true
+    rm -f "$USER_SYSTEMD_DIR/default.target.wants/plainsync.service" || true
+    rm -f "$USER_SYSTEMD_DIR/plainsync.service" || true
 fi
 
 exit 0

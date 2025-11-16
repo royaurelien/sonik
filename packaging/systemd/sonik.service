@@ -1,11 +1,11 @@
 [Unit]
-Description=Sonik Sync Daemon
+Description=Plainsync Sync Daemon
 After=default.target
 
 [Service]
 Type=notify
 NotifyAccess=all
-ExecStart=/usr/bin/sonikd
+ExecStart=/usr/bin/plainsyncd
 Restart=on-failure
 
 [Install]

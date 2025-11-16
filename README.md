@@ -1,12 +1,12 @@
-# Sonik
+# Plainsync
 
 ![Love](https://img.shields.io/badge/Made%20with%20%E2%9D%A4-Rust-orange)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-[![Build & Release Sonik](https://github.com/royaurelien/sonik/actions/workflows/release.yml/badge.svg)](https://github.com/royaurelien/sonik/actions/workflows/release.yml)
+[![Build & Release Plainsync](https://github.com/toolsforfolk/plainsync/actions/workflows/release.yml/badge.svg)](https://github.com/toolsforfolk/plainsync/actions/workflows/release.yml)
 
 ## Fast diff-based sync for devices
 
-Originally built for the Innoasis Y1 MP3 player, Sonik focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).  
+Originally built for the Innoasis Y1 MP3 player, Plainsync focuses on **syncing folders**, not managing a music library (see [beets](https://github.com/beetbox/beets) for that).  
 It performs **diff-based transfers** with **no unnecessary writes**, preserving your device’s lifespan.  
 **Fast**, **minimal**, and **adaptable**, it can easily extend to other targets beyond music players.
 
@@ -21,25 +21,25 @@ It performs **diff-based transfers** with **no unnecessary writes**, preserving 
 
 ## Installation
 
-Download pre-built binaries from the **[Releases page](https://github.com/royaurelien/sonik/releases)**
+Download pre-built binaries from the **[Releases page](https://github.com/toolsforfolk/plainsync/releases)**
 
 You will get:
 
-- `sonik` — CLI tool  
-- `sonikd` — background daemon  
+- `plainsync` — CLI tool  
+- `plainsyncd` — background daemon  
 
 ## Configuration
 
 Run:
 
 ```bash
-sonik config edit
+plainsync config edit
 ```
 
 The config file is typically located at:
 
 ```
-~/.config/sonik/config.yaml
+~/.config/plainsync/config.yaml
 ```
 
 Example:
@@ -76,20 +76,20 @@ device:
 
 You may define **multiple devices and folders**.
 
-> If in doubt, use the `sonik config show` command to check the interpreted values.
+> If in doubt, use the `plainsync config show` command to check the interpreted values.
 
 ## Usage
 
 Manual sync:
 
 ```bash
-sonik sync run
+plainsync sync run
 ```
 
 Daemon:
 
 ```bash
-sonikd
+plainsyncd
 ```
 
 ### Run in background (systemd user)
@@ -98,20 +98,20 @@ If you installed manually:
 
 ```bash
 mkdir -p ~/.config/systemd/user
-cp sonik.service ~/.config/systemd/user/sonik.service
+cp plainsync.service ~/.config/systemd/user/plainsync.service
 systemctl --user daemon-reload
-systemctl --user enable --now sonik.service
+systemctl --user enable --now plainsync.service
 ```
 
 View logs:
 
 ```bash
-journalctl --user -u sonik -f
+journalctl --user -u plainsync -f
 ```
 
 ## How It Works
 
-Sonik keeps a local binary index for each device/folder pairing.  
+Plainsync keeps a local binary index for each device/folder pairing.  
 During sync, it compares:
 
 - current filesystem state  
@@ -119,7 +119,7 @@ During sync, it compares:
 
 …to determine exactly what to upload or delete — avoiding unnecessary writes.
 
-The daemon (`sonikd`) handles:
+The daemon (`plainsyncd`) handles:
 
 - device mount detection  
 - directory watching (via inotify)  
@@ -184,13 +184,13 @@ touch /media/$USER/MyUSB/.test && rm /media/$USER/MyUSB/.test
 Check process:
 
 ```bash
-ps aux | grep sonikd
+ps aux | grep plainsyncd
 ```
 
 **Want verbose logs?**
 
 ```bash
-RUST_LOG=debug sonik sync run
+RUST_LOG=debug plainsync sync run
 ```
 
 ## License

@@ -3,7 +3,7 @@
 
 //! Unit tests for core modules (scanner, diff, index)
 
-use sonik::core::{diff, index::IndexedFile, scanner};
+use plainsync::core::{diff, index::IndexedFile, scanner};
 use std::fs;
 use tempfile::TempDir;
 
@@ -200,7 +200,7 @@ mod diff_tests {
 #[cfg(test)]
 mod index_tests {
     use super::*;
-    use sonik::core::index::Index;
+    use plainsync::core::index::Index;
 
     #[test]
     fn test_index_save_and_load() {
