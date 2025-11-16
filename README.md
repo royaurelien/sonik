@@ -99,7 +99,7 @@ If you installed manually:
 
 ```bash
 mkdir -p ~/.config/systemd/user
-cp plainsync.service ~/.config/systemd/user/plainsync.service
+cp packaging/systemd/plainsync.service ~/.config/systemd/user/plainsync.service
 systemctl --user daemon-reload
 systemctl --user enable --now plainsync.service
 ```
