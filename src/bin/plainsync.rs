@@ -19,7 +19,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Synchronization operations
+    /// Run synchronization tasks
     Run {
         #[arg(long)]
         no_progress_bar: bool,
@@ -28,15 +28,16 @@ pub enum Commands {
         verbose: bool,
     },
 
-    /// Manage configuration
+    /// View or edit configuration
     Config(ConfigCommands),
 
-    /// Index management
+    /// Inspect and manage index files
     Index(IndexCommands),
 }
 
 #[derive(Subcommand)]
 pub enum SyncSubcommands {
+    /// Run synchronization for all configured devices
     Run {
         #[arg(long)]
         no_progress_bar: bool,
@@ -54,7 +55,9 @@ pub struct ConfigCommands {
 
 #[derive(Subcommand)]
 pub enum ConfigSubcommands {
+    /// Show the current configuration
     Show ,
+    /// Edit the configuration file
     Edit,
 }
 
@@ -66,26 +69,24 @@ pub struct IndexCommands {
 
 #[derive(Subcommand)]
 pub enum IndexSubcommands {
-    Show {
+    /// List indexed
+    Ls {
         device: Option<String>,
-
-        #[arg(short, long)]
-        verbose: bool,
     },
 
+    /// Clear all index files for a device
     Clear {
         device: String,
     },
 
+    /// Dump the contents of an index file to the console.
     Dump {
-        file: String,
-
-        #[arg(short, long)]
-        pretty: bool,
+        filepath: String,
     },
 
+    /// Display statistics about an index file.
     Stats {
-        file: String,
+        device: Option<String>,
     },
 }
 
@@ -113,17 +114,17 @@ fn main() -> Result<()> {
         },
 
         Commands::Index(cmd) => match cmd.command {
-            IndexSubcommands::Show { device, verbose } =>
-                commands::indexes::run_show(&ctx, device.as_deref(), verbose)?,
+            IndexSubcommands::Ls { device } =>
+                commands::index::run_ls(&ctx, device.as_deref())?,
 
             IndexSubcommands::Clear { device } =>
-                commands::indexes::run_clear(&ctx, &device)?,
+                commands::index::run_clear(&ctx, &device)?,
 
-            IndexSubcommands::Dump { file, pretty } =>
-                commands::indexes::run_dump(&file, pretty)?,
+            IndexSubcommands::Dump { filepath } =>
+                commands::index::run_dump(&filepath)?,
 
-            IndexSubcommands::Stats { file } =>
-                commands::indexes::run_stats(&file)?,
+            IndexSubcommands::Stats { device } =>
+                commands::index::run_stats(&ctx, device.as_deref())?,
         },
     }
 

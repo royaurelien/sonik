@@ -29,6 +29,23 @@ pub fn human_date(ts: i64) -> String {
     dt.format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
+/// Shorten a string by keeping the start and end,
+/// inserting "…" in the middle if it exceeds `max_len`.
+pub fn shrink_middle(input: &str, max_len: usize) -> String {
+    let len = input.chars().count();
+    if len <= max_len {
+        return input.to_string();
+    }
+
+    // always reserve space for the ellipsis
+    let keep = (max_len.saturating_sub(1)) / 2;
+
+    let start: String = input.chars().take(keep).collect();
+    let end: String = input.chars().rev().take(keep).collect::<String>().chars().rev().collect();
+
+    format!("{start}…{end}")
+}
+
 pub fn notify(summary: &str, body: &str) {
     notify_rust::Notification::new()
         .appname("Plainsync")

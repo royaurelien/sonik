@@ -4,5 +4,5 @@
 //! Module aggregating all command implementations.
 
 pub mod run;
-pub mod indexes;
+pub mod index;
 pub mod config;

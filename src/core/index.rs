@@ -29,11 +29,14 @@ pub struct Index {
     pub generated_at: i64,
     pub files: Vec<IndexedFile>,
 
-    // #[serde(skip)]
-    // exists: bool,
-
     #[serde(skip)]
-    path: PathBuf,
+    pub path: PathBuf,
+    pub total_files: usize,
+    pub total_size: u64,
+    pub avg_size: u64,
+    pub biggest: Option<IndexedFile>,
+    pub newest: Option<IndexedFile>,
+    pub oldest: Option<IndexedFile>,
 }
 
 impl Index {
@@ -45,6 +48,12 @@ impl Index {
                 generated_at: Utc::now().timestamp(),
                 files: vec![],
                 path: path.to_path_buf(),
+                total_files: 0,
+                total_size: 0,
+                avg_size: 0,
+                biggest: None,
+                newest: None,
+                oldest: None,                
             });
         }
 
@@ -52,6 +61,16 @@ impl Index {
         let mut idx: Self = bincode::deserialize(&raw)?;
 
         idx.path = path.to_path_buf();
+        idx.total_files = idx.files.len();
+        idx.total_size = idx.files.iter().map(|f| f.size).sum();
+        idx.avg_size = if idx.total_files > 0 {
+            idx.total_size / idx.total_files as u64
+        } else {
+            0
+        };
+        idx.biggest = idx.files.iter().max_by_key(|f| f.size).cloned();
+        idx.newest = idx.files.iter().max_by_key(|f| f.mtime).cloned();
+        idx.oldest = idx.files.iter().min_by_key(|f| f.mtime).cloned();
 
         Ok(idx)
     }
