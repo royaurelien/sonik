@@ -11,7 +11,7 @@ use crate::sync::planner::plan_sync;
 
 /// Run sync immediately for all devices defined in the config.
 pub fn run_now(ctx: &ExecutionContext, verbose: bool, show_progress: bool) -> Result<()> {
-    println!("Starting Sonik...");
+    tracing::info!("Starting Sonik run");
 
     let plan = plan_sync(ctx)?;
 
@@ -39,11 +39,11 @@ fn sync_one(conf: &SyncConfig, verbose: bool, show_progress: bool) -> Result<()>
 
     match sync_folder(conf, verbose, show_progress) {
         Ok(_) => {
-            println!("OK");
+            println!("Sync for device '{}' completed successfully.", conf.device_name);
             Ok(())
         }
         Err(e) => {
-            println!("Error: {}", e);
+            println!("Error syncing device '{}': {}", conf.device_name, e);
             Err(e)
         }
     }

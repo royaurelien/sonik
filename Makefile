@@ -20,7 +20,8 @@ install:
 
 
 uninstall:
-	cargo uninstall sonik || true
+	cargo uninstall || true
+	sudo apt remove sonik || true
 
 deb:
 	sudo apt remove sonik || true

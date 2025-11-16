@@ -12,6 +12,9 @@ pub struct Diff {
 }
 
 pub fn compute_diff(local: &[IndexedFile], previous: &[IndexedFile]) -> Diff {
+    
+    tracing::debug!("Computing diff between local files and previous index");
+    
     let mut prev_map = HashMap::new();
     for f in previous {
         prev_map.insert(&f.path, (f.size, f.mtime));
@@ -23,7 +26,11 @@ pub fn compute_diff(local: &[IndexedFile], previous: &[IndexedFile]) -> Diff {
     for lf in local {
         match prev_map.get(&lf.path) {
             Some((size, mtime)) if *size == lf.size && *mtime == lf.mtime => {}
-            _ => to_upload.push(lf.clone()),
+            _ => 
+            {
+                tracing::debug!("Updated: {}", lf.path);
+                to_upload.push(lf.clone());
+            },
         }
     }
 
@@ -33,6 +40,7 @@ pub fn compute_diff(local: &[IndexedFile], previous: &[IndexedFile]) -> Diff {
 
     for pf in previous {
         if !local_set.contains(&pf.path) {
+            tracing::debug!("Deleted: {}", pf.path);
             to_delete.push(pf.path.clone());
         }
     }

@@ -4,7 +4,6 @@ version = "1.0.0"
 edition = "2021"
 authors = ["Aurelien ROY <roy.aurelien@etik.com>"]
 license = "MIT"
-license-file = "LICENSE"
 readme = "README.md"
 categories = ["command-line-utilities"]
 description = "Fast, diff-based sync utility for music devices and other targets."

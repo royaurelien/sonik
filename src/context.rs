@@ -9,7 +9,7 @@ use std::env;
 use std::path::PathBuf;
 
 use crate::config::{AppConfig, SyncConfig, DeviceConfig};
-
+use crate::utils::paths;
 #[derive(Clone, Debug)]
 pub struct EnvContext {
     pub home: String,
@@ -23,10 +23,18 @@ pub struct PathExpander {
 }
 
 #[derive(Debug, Clone)]
+pub struct Paths {
+    pub home: PathBuf,
+    pub data: PathBuf,
+    pub conf: PathBuf,
+}
+
+#[derive(Debug, Clone)]
 pub struct ExecutionContext {
     pub config: AppConfig,
     pub env: EnvContext,
     pub expander: PathExpander,
+    pub paths: Paths,
 }
 
 impl EnvContext {
@@ -48,7 +56,12 @@ impl ExecutionContext {
     pub fn new(config: AppConfig) -> Self {
         let env = EnvContext::gather();
         let expander = PathExpander::new(env.clone());
-        Self { config, env, expander }
+        let paths = Paths {
+            home: paths::home_dir().expect("Failed to get home directory"),
+            data: paths::app_data_dir().expect("Failed to get app data directory"),
+            conf: paths::app_config_dir().expect("Failed to get app config directory"),
+        };
+        Self { config, env, expander, paths }
     }
 
     pub fn from_default_config() -> Result<Self, anyhow::Error> {

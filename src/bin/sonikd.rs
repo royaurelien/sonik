@@ -4,7 +4,7 @@
 //! Main daemon entry point for Sonik application.
 
 use anyhow::Result;
-use tracing_subscriber::fmt;
+use tracing_subscriber::EnvFilter;
 
 use sonik::daemon::state::DaemonState;
 use sonik::sync::detect_loop::{start_detect_loop, DetectCallbacks};
@@ -16,7 +16,9 @@ use sonik::context::ExecutionContext;
 static DAEMON_STATE: once_cell::sync::OnceCell<DaemonState> = once_cell::sync::OnceCell::new();
 
 fn main() -> Result<()> {
-    fmt().with_target(false).with_ansi(false).init();
+    tracing_subscriber::fmt()
+    .with_env_filter(EnvFilter::from_default_env())
+    .init();
     tracing::info!("Sonik daemon starting…");
 
     // 1. Build execution context

@@ -8,7 +8,7 @@ use sonik::context::ExecutionContext;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use anyhow::Result;
-use log::info;
+use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
 #[command(author, version)]
@@ -42,6 +42,7 @@ enum Cmd {
     ShowConfig {
     },
     ShowIndexes {
+        device: String,
     },
     EditConfig {
 
@@ -49,8 +50,11 @@ enum Cmd {
 }
 
 fn main() -> Result<()> {
-    env_logger::init();
-    info!("Sonik starting…");
+    tracing_subscriber::fmt()
+    .with_env_filter(EnvFilter::from_default_env())
+    .with_writer(std::io::stderr)
+    .init();
+    tracing::info!("Sonik starting…");
 
     let cli = Cli::parse();
     let show_progress = !cli.no_progress_bar;
@@ -72,15 +76,15 @@ fn main() -> Result<()> {
         }
 
         Some(Cmd::ClearIndex { device }) => {
-            commands::clear::run(&device)?;
+            commands::indexes::run_clear(&ctx, &device)?;
         }
 
         Some(Cmd::ShowConfig { }) => {
             commands::config::run_show(&ctx, verbose)?;
         }
         
-        Some(Cmd::ShowIndexes { }) => {
-            commands::show_indexes::run(&ctx, verbose)?;
+        Some(Cmd::ShowIndexes { device }) => {
+            commands::indexes::run_show(&ctx, &device,verbose)?;
         }
 
         Some(Cmd::EditConfig { }) => {
