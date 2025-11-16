@@ -33,7 +33,7 @@ pub fn detect_all_devices(ctx: &ExecutionContext) -> Vec<(DeviceConfig, PathBuf)
     let mut out = Vec::new();
     let mounts = read_mounts();
 
-    for dev in &ctx.config.device {
+    for dev in &ctx.config.devices {
         // Always produce the expected full mount path
         let expected = ctx.expand_mount(dev);
 

@@ -7,9 +7,10 @@ use anyhow::Result;
 
 use crate::context::ExecutionContext;
 use crate::core::index::Index;
+use crate::utils::human::{human_size, human_date};
 
 /// Command to show indexes for configured devices.
-pub fn run_show(ctx: &ExecutionContext, device: &str, verbose: bool) -> Result<()> {
+pub fn run_show(ctx: &ExecutionContext, device: Option<&str>, verbose: bool) -> Result<()> {
     let all = ctx.config._build_sync_configs(false)?;
 
     if all.is_empty() {
@@ -18,7 +19,7 @@ pub fn run_show(ctx: &ExecutionContext, device: &str, verbose: bool) -> Result<(
     }
 
     // Normalize device filter (optional)
-    let device_filter = device.trim();
+    let device_filter = device.unwrap_or("").trim();
     let filtering = !device_filter.is_empty();
 
     for sync_conf in all {
@@ -62,5 +63,72 @@ pub fn run_clear(ctx: &ExecutionContext, device: &str) -> Result<()> {
     fs::remove_dir_all(&target_dir)?;
 
     println!("Done. Index will rebuild automatically on next sync.");
+    Ok(())
+}
+
+pub fn run_dump(file: &str, pretty: bool) -> Result<()> {
+    let raw = fs::read(file)?;
+    let index: Index = bincode::deserialize(&raw)?;
+
+    if !pretty {
+        println!("{}", serde_json::to_string(&index)?);
+        return Ok(());
+    }
+
+    println!("VERSION: {}", index.version);
+    println!("GENERATED_AT: {}", human_date(index.generated_at));
+    println!("FILES: {}\n", index.files.len());
+
+    println!("{:<20}  {:>12}  {}", "MODIFIED", "SIZE", "PATH");
+    println!("{}", "-".repeat(60));
+
+    for f in index.files {
+        println!(
+            "{:<20}  {:>12}  {}",
+            human_date(f.mtime),
+            human_size(f.size),
+            f.path
+        );
+    }
+
+    Ok(())
+}
+
+/// Command to display statistics about an index file.
+pub fn run_stats(file: &str) -> anyhow::Result<()> {
+    let raw = fs::read(&file)?;
+    let index: Index = bincode::deserialize(&raw)?;
+
+    let total_files = index.files.len();
+    let total_size: u64 = index.files.iter().map(|f| f.size).sum();
+    let avg_size = if total_files > 0 {
+        total_size / total_files as u64
+    } else {
+        0
+    };
+
+    let biggest = index.files.iter().max_by_key(|f| f.size);
+    let newest = index.files.iter().max_by_key(|f| f.mtime);
+    let oldest = index.files.iter().min_by_key(|f| f.mtime);
+
+    println!("VERSION: {}", index.version);
+    println!("GENERATED_AT: {}", human_date(index.generated_at));
+    println!("FILES: {}", total_files);
+    println!("TOTAL SIZE: {}", human_size(total_size));
+    println!("AVERAGE SIZE: {}", human_size(avg_size));
+
+    if let Some(f) = biggest {
+        println!("BIGGEST: {} ({})", f.path, human_size(f.size));
+    }
+
+    if let Some(f) = newest {
+        println!("NEWEST: {} ({})", f.path, human_date(f.mtime));
+    }
+
+    if let Some(f) = oldest {
+        println!("OLDEST: {} ({})", f.path, human_date(f.mtime));
+    }
+
+    println!();
     Ok(())
 }

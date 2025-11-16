@@ -17,27 +17,47 @@ pub fn run_edit() -> anyhow::Result<()> {
 }
 
 // Show the current sync configuration.
-pub fn run_show(ctx: &ExecutionContext, verbose: bool) -> Result<()> {
+pub fn run_show(ctx: &ExecutionContext) -> Result<()> {
+    let sync_confs = ctx.config._build_sync_configs(false)?;
+    let devices = &ctx.config.devices;
 
-    let all = ctx.config._build_sync_configs(false)?;
-
-    if all.is_empty() {
-        println!("No folders configured for sync.");
+    if devices.is_empty() {
+        println!("No devices configured.");
         return Ok(());
     }
 
-    println!("Configured devices for sync:");
-    for sync_conf in all {
-        if verbose {
-            println!("- Device: {}", sync_conf.device_name);
-            println!("  Source: {}", sync_conf.source.display());
-            println!("  Target: {}", sync_conf.target.display());
-            println!("  Index:  {}", sync_conf.index_path.display());
-        } else {
-            println!("{}", sync_conf);
+    for dev in devices {
+        println!("\nDevices:");
+        println!("  Name: {}", dev.name);
+        println!("  Mount path: {}", ctx.expand_mount(&dev).to_str().unwrap_or(""));
+        println!("  Use mountinfo: {}", dev.mountinfo);
+
+
+        // Now find matching SyncConfigs (expanded folders, absolute paths, index paths)
+        let matching: Vec<_> = sync_confs
+            .iter()
+            .filter(|sc| sc.device_name == dev.name)
+            .collect();
+
+        if matching.is_empty() {
+            println!("  (No resolved sync folders for this device)");
+            continue;
+        }
+
+        let matching = ctx.expand_paths(matching);
+
+        println!("  Folders:");
+
+        for sc in matching {
+            println!("    Folder:");
+            println!("      Source: {}", sc.source.display());
+            println!("      Target: {}", sc.target.display());
+            println!("      Index : {}", sc.index_path.display());
+            println!("      Enabled : {}", sc.enabled);
         }
     }
-    println!();
 
+    println!();
     Ok(())
 }
+

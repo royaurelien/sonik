@@ -6,96 +6,127 @@
 use sonik::commands;
 use sonik::context::ExecutionContext;
 
-use clap::{CommandFactory, Parser, Subcommand};
+use clap::{Parser, Subcommand};
 use anyhow::Result;
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
-#[command(author, version)]
+#[command(author, version, about)]
 struct Cli {
-    /// Disable progress bars during sync
-    #[arg(long)]
-    no_progress_bar: bool,
-
-    #[arg(short,long)]
-    verbose: bool,
-
     #[command(subcommand)]
-    command: Option<Cmd>,
+    pub command: Commands,
 }
 
 #[derive(Subcommand)]
-enum Cmd {
+pub enum Commands {
+    /// Sync commands
+    Sync(SyncCommands),
+
+    /// Manage configuration
+    Config(ConfigCommands),
+
+    /// Index management
+    Index(IndexCommands),
+}
+
+#[derive(Parser)]
+pub struct SyncCommands {
+    #[command(subcommand)]
+    pub command: SyncSubcommands,
+}
+
+#[derive(Subcommand)]
+pub enum SyncSubcommands {
     Run {
+        #[arg(long)]
+        no_progress_bar: bool,
+
+        #[arg(short, long)]
+        verbose: bool,
     },
+}
+
+#[derive(Parser)]
+pub struct ConfigCommands {
+    #[command(subcommand)]
+    pub command: ConfigSubcommands,
+}
+
+#[derive(Subcommand)]
+pub enum ConfigSubcommands {
+    Show ,
+    Edit,
+}
+
+#[derive(Parser)]
+pub struct IndexCommands {
+    #[command(subcommand)]
+    pub command: IndexSubcommands,
+}
+
+#[derive(Subcommand)]
+pub enum IndexSubcommands {
+    Show {
+        device: Option<String>,
+
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    Clear {
+        device: String,
+    },
+
     Dump {
         file: String,
+
         #[arg(short, long)]
         pretty: bool,
     },
+
     Stats {
         file: String,
-    },
-    ClearIndex {
-        device: String,
-    },
-    ShowConfig {
-    },
-    ShowIndexes {
-        device: String,
-    },
-    EditConfig {
-
     },
 }
 
 fn main() -> Result<()> {
     tracing_subscriber::fmt()
-    .with_env_filter(EnvFilter::from_default_env())
-    .with_writer(std::io::stderr)
-    .init();
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_writer(std::io::stderr)
+        .init();
+
     tracing::info!("Sonik starting…");
 
     let cli = Cli::parse();
-    let show_progress = !cli.no_progress_bar;
-    let verbose = cli.verbose;
-
     let ctx = ExecutionContext::from_default_config()?;
 
     match cli.command {
-        Some(Cmd::Run { }) => {
-            commands::run::run_now(&ctx, verbose, show_progress)?;
-        }   
+        Commands::Sync(cmd) => match cmd.command {
+            SyncSubcommands::Run { verbose, no_progress_bar } =>
+                commands::run::run_now(&ctx, verbose, no_progress_bar)?,
+        },
 
-        Some(Cmd::Dump { file, pretty }) => {
-            commands::dump::run(&file, pretty)?;
-        }
+        Commands::Config(cmd) => match cmd.command {
+            ConfigSubcommands::Show =>
+                commands::config::run_show(&ctx)?,
 
-        Some(Cmd::Stats { file }) => {
-            commands::stats::run(&file)?;
-        }
+            ConfigSubcommands::Edit =>
+                commands::config::run_edit()?,
+        },
 
-        Some(Cmd::ClearIndex { device }) => {
-            commands::indexes::run_clear(&ctx, &device)?;
-        }
+        Commands::Index(cmd) => match cmd.command {
+            IndexSubcommands::Show { device, verbose } =>
+                commands::indexes::run_show(&ctx, device.as_deref(), verbose)?,
 
-        Some(Cmd::ShowConfig { }) => {
-            commands::config::run_show(&ctx, verbose)?;
-        }
-        
-        Some(Cmd::ShowIndexes { device }) => {
-            commands::indexes::run_show(&ctx, &device,verbose)?;
-        }
+            IndexSubcommands::Clear { device } =>
+                commands::indexes::run_clear(&ctx, &device)?,
 
-        Some(Cmd::EditConfig { }) => {
-            commands::config::run_edit()?;
-        }
+            IndexSubcommands::Dump { file, pretty } =>
+                commands::indexes::run_dump(&file, pretty)?,
 
-        None => {
-            // print help if no command given
-            Cli::command().print_help()?;
-            println!();
-        }
+            IndexSubcommands::Stats { file } =>
+                commands::indexes::run_stats(&file)?,
+        },
     }
 
     Ok(())

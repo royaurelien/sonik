@@ -17,7 +17,7 @@ pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
 /// Top-level configuration
 #[derive(Debug, Deserialize, Clone)]
 pub struct AppConfig {
-    pub device: Vec<DeviceConfig>,
+    pub devices: Vec<DeviceConfig>,
     pub watch: WatchConfig,
 }
 
@@ -104,7 +104,7 @@ impl AppConfig {
 
         let data_base = paths::app_data_dir()?;
 
-        for device in &self.device {
+        for device in &self.devices {
             for folder in &device.folders {
                 if active_only && !folder.enabled {
                     continue;
