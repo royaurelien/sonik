@@ -31,5 +31,4 @@ perf.data.old
 .env.local
 
 *.img
-ARCHITECTURE.md
-INDEX_STRATEGY.md
+.docs/
