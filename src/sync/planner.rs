@@ -15,7 +15,7 @@ use crate::core::task::{SyncTask, SyncTaskFilter, SyncTaskExpand};
 /// This is used by both the daemon and the run_sync CLI command.
 pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncTask>> {
     // Step 1: build all possible sync configs from YAML
-    let tasks = ctx.config.load_tasks()?.enabled();
+    let tasks = ctx.config.load_tasks()?.filter_enabled();
 
     // Expand paths from context (e.g., ~ to home directory)
     let tasks = tasks.expanded(ctx);
@@ -36,7 +36,7 @@ pub fn plan_sync(ctx: &ExecutionContext) -> Result<Vec<SyncTask>> {
     let mounted_names: HashSet<&str> =
         mounted.iter().map(|(dev, _)| dev.name.as_str()).collect();
 
-    let filtered = tasks.only_devices(&mounted_names);
+    let filtered = tasks.filter_by_devices(&mounted_names);
 
     Ok(filtered)
 }

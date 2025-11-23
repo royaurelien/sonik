@@ -42,33 +42,32 @@ impl SyncTask {
 }
 
 pub trait SyncTaskFilter {
-    fn by_device(self, name: &str) -> Vec<SyncTask>;
-    fn enabled(self) -> Vec<SyncTask>;
-    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask>;
+    fn filter_by_device(self, name: &str) -> Vec<SyncTask>;
+    fn filter_by_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask>;
+    fn filter_enabled(self) -> Vec<SyncTask>;
 }
 
 impl SyncTaskFilter for Vec<SyncTask> {
     // Filter SyncTasks by device name.
-    fn by_device(self, name: &str) -> Vec<SyncTask> {
+    fn filter_by_device(self, name: &str) -> Vec<SyncTask> {
         self.into_iter()
             .filter(|c| c.device.name == name)
             .collect()
     }
 
-    // Filter SyncTasks to only those that are enabled.
-    fn enabled(self) -> Vec<SyncTask> {
-        self.into_iter()
-            .filter(|item| item.folder.enabled)
-            .collect()
-    }
-
     // Filter SyncTasks to only those whose device names are in the provided set.
-    fn only_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask> {
+    fn filter_by_devices(self, names: &std::collections::HashSet<&str>) -> Vec<SyncTask> {
         self.into_iter()
             .filter(|item| names.contains(item.device.name.as_str()))
             .collect()
     }
 
+    // Filter SyncTasks to only those that are enabled.
+    fn filter_enabled(self) -> Vec<SyncTask> {
+        self.into_iter()
+            .filter(|item| item.folder.enabled)
+            .collect()
+    }
 }
 
 pub trait SyncTaskExpand {

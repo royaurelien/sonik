@@ -37,7 +37,7 @@ pub fn run_show(ctx: &ExecutionContext) -> Result<()> {
 
 
         // Now find matching SyncTasks for this device
-        let filtered: Vec<_> = tasks.clone().by_device(&dev.name);
+        let filtered: Vec<_> = tasks.clone().filter_by_device(&dev.name);
 
         if filtered.is_empty() {
             println!("  (No resolved sync folders for this device)");

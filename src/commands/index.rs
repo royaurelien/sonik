@@ -26,7 +26,7 @@ pub fn run_ls(
     // If a device filter is provided, apply it
     if let Some(dev) = device {
         let dev = dev.trim();
-        tasks = tasks.clone().by_device(dev);
+        tasks = tasks.clone().filter_by_device(dev);
     }
 
     if tasks.is_empty() {
@@ -124,7 +124,7 @@ pub fn run_stats(ctx: &ExecutionContext, device: Option<&str>) -> anyhow::Result
     // If a device filter is provided, apply it
     if let Some(dev) = device {
         let dev = dev.trim();
-        tasks = tasks.clone().by_device(dev);
+        tasks = tasks.clone().filter_by_device(dev);
     }
 
     if tasks.is_empty() {
