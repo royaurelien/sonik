@@ -15,18 +15,17 @@ use crate::core::task::SyncTask;
 
 pub const DEFAULT_CONFIG: &str = include_str!("../assets/default_config.yaml");
 
-/// Top-level configuration
-#[derive(Debug, Deserialize, Clone)]
-pub struct AppConfig {
-    pub devices: Vec<DeviceConfig>,
-    pub watch: WatchConfig,
-}
-
 /// Watcher configuration
 #[derive(Debug, Deserialize, Clone)]
 pub struct WatchConfig {
     pub enabled: bool,
     pub debounce_ms: u64,
+}
+
+#[derive(Debug, Deserialize, Clone, Copy)]
+pub enum SyncMode {
+    Push,
+    Pull,
 }
 
 /// Device entry in YAML
@@ -45,6 +44,14 @@ pub struct FolderConfig {
     pub source: String,
     pub target: String,
     pub enabled: bool,
+    pub mode: Option<SyncMode>, // None = push (backward compatible)
+}
+
+/// Top-level configuration
+#[derive(Debug, Deserialize, Clone)]
+pub struct AppConfig {
+    pub devices: Vec<DeviceConfig>,
+    pub watch: WatchConfig,
 }
 
 impl AppConfig {
@@ -95,9 +102,24 @@ impl AppConfig {
                 let index_path = data_base
                     .join(&device.name)
                     .join(format!("{}.bin", unique_slug(&folder.target, &device.name)));
+                
+                // Push or Pull, depending on folder.mode (default to Push)
+                let mode = folder.mode.unwrap_or(SyncMode::Push);
 
-                let source = PathBuf::from(&folder.source);
-                let target = PathBuf::from(&device.mount).join(&folder.target);
+                let (source, target) = match mode {
+                    SyncMode::Push => {
+                        // source = host, target = device
+                        let src = PathBuf::from(&folder.source);
+                        let dst = PathBuf::from(&device.mount).join(&folder.target);
+                        (src, dst)
+                    }
+                    SyncMode::Pull => {
+                        // source = device, target = host
+                        let src = PathBuf::from(&device.mount).join(&folder.source);
+                        let dst = PathBuf::from(&folder.target);
+                        (src, dst)
+                    }
+                };
 
                 out.push(SyncTask {
                     device: device.clone(),
@@ -105,6 +127,7 @@ impl AppConfig {
                     index_path,
                     source,
                     target,
+                    mode
                 });
             }
         }

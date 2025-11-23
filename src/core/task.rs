@@ -6,7 +6,7 @@
 
 use std::path::PathBuf;
 
-use crate::config::{DeviceConfig, FolderConfig};
+use crate::config::{DeviceConfig, FolderConfig, SyncMode};
 use crate::context::ExecutionContext;
 use crate::core::index::Index;
 
@@ -21,16 +21,15 @@ pub struct SyncTask {
     pub index_path: PathBuf,
     pub source: PathBuf,
     pub target: PathBuf,
+    pub mode: SyncMode,
 }
 
 impl SyncTask {
     // Return a new SyncTask with expanded source and target paths.
     pub fn expanded(&self, ctx: &ExecutionContext) -> Self {
-        let src = self.source.to_string_lossy();
-        let tgt = self.target.to_string_lossy();        
         SyncTask {
-            source: ctx.expander.expand(&src, self.device.name.as_str()),
-            target: ctx.expander.expand(&tgt, self.device.name.as_str()),
+            source: ctx.expander.expand(self.source.to_str().unwrap(), &self.device.name),
+            target: ctx.expander.expand(self.target.to_str().unwrap(), &self.device.name),
             ..self.clone()
         }
     }
